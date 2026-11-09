@@ -1,0 +1,670 @@
+<title>Records Intelligence</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: picture-first story. Each section is icons + a few words; red and yellow only as soft tints and thin lines. */
+:root {
+  --rosso: #c8463d; --rosso-tint: #fbeceb; --rosso-mid: #eab0ab;
+  --giallo: #f2c94c; --giallo-tint: #fdf6dd; --tag-ink: #7a6118;
+  --ground: #fbfbfc; --panel: #ffffff; --soft: #f4f5f7;
+  --ink: #2b2d33; --muted: #6f737c; --rule: #e7e8ec;
+  --green: #4a9d72; --green-tint: #e8f4ee;
+  --display: "Titillium Web", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font: 16px/1.5 var(--body); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.label { font: 700 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--rosso); }
+.ic { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+section.band { padding-block: 40px; }
+.head { display: grid; gap: 6px; margin-bottom: 22px; }
+.head h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); }
+
+.hero { background: linear-gradient(180deg, var(--panel), var(--rosso-tint)); border-bottom: 1px solid var(--rule); position: relative; padding-block: 48px 40px; }
+.hero::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: linear-gradient(90deg, var(--rosso) 0 82%, var(--giallo) 82%); opacity: .8; }
+.hero .inner { display: grid; gap: 22px; }
+.hero h1 { font-size: clamp(2.2rem, 5.5vw, 3.5rem); line-height: 1.05; }
+.hero h1 em { font-style: normal; color: var(--rosso); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.kpi .ic { width: 34px; height: 34px; color: var(--rosso); background: var(--rosso-tint); border-radius: 10px; padding: 6px; }
+.kpi b { display: block; font: 700 1.7rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 13px; color: var(--muted); }
+
+.ba { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.side { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
+.side h3 { font-size: 1.05rem; color: var(--muted); text-align: center; }
+.side.after { background: linear-gradient(180deg, var(--panel), var(--rosso-tint)); border-color: var(--rosso-tint); }
+.side.after h3 { color: var(--rosso); }
+.icons { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ib { display: grid; justify-items: center; gap: 6px; text-align: center; font-size: 13px; color: var(--muted); }
+.ib .ic { width: 46px; height: 46px; padding: 10px; border-radius: 50%; background: var(--soft); color: var(--muted); }
+.after .ib { color: var(--ink); }
+.after .ib .ic { background: var(--panel); color: var(--rosso); box-shadow: 0 0 0 1px var(--rosso-tint); }
+.arrow { font: 700 2rem var(--display); color: var(--rosso); }
+
+.track { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.track::before { content: ""; position: absolute; left: 10%; right: 10%; top: 38px; border-top: 3px dashed var(--rosso-mid); }
+.node { position: relative; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.node .ring { width: 78px; height: 78px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); border: 3px solid var(--rosso); color: var(--rosso); box-shadow: 0 6px 18px -12px rgba(200, 70, 61, .7); }
+.node:last-child .ring { border-color: var(--giallo); color: var(--tag-ink); }
+.node .ring .ic { width: 34px; height: 34px; }
+.node .n { position: absolute; top: -6px; left: calc(50% + 22px); font: 700 12px var(--display); background: var(--giallo); color: var(--ink); border-radius: 999px; width: 22px; height: 22px; display: grid; place-items: center; }
+.node h3 { font-size: 1.05rem; }
+.node .card { width: 100%; max-width: 170px; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; color: var(--muted); min-height: 54px; display: grid; place-items: center; }
+.card b { color: var(--ink); }
+.card .tagy { font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .05em; background: var(--giallo-tint); color: var(--tag-ink); padding: 2px 8px; border-radius: 6px; }
+.card .okc { color: var(--green); font-weight: 600; }
+.mini { display: grid; gap: 3px; width: 100%; }
+.mini i { display: block; height: 4px; border-radius: 2px; background: var(--rule); }
+.mini i:nth-child(2) { width: 70%; } .mini i:nth-child(3) { width: 85%; background: var(--rosso-mid); }
+.photo { display: inline-flex; align-items: center; gap: 6px; }
+.photo .ic { width: 18px; height: 18px; color: var(--muted); }
+
+.cockpit { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; overflow: hidden; box-shadow: 0 16px 36px -30px rgba(40, 45, 60, .35); }
+.bar { background: var(--soft); display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+.brand { font: 700 17px var(--display); margin-right: 14px; display: flex; align-items: center; gap: 8px; }
+.brand::before { content: ""; width: 8px; height: 16px; border-radius: 2px; background: linear-gradient(var(--rosso) 0 70%, var(--giallo) 70%); transform: skewX(-14deg); opacity: .85; }
+.tab { font: 600 14px var(--display); color: var(--muted); background: transparent; border: 0; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.tab .ic { width: 16px; height: 16px; }
+.tab:hover { color: var(--ink); background: var(--panel); }
+.tab[aria-selected="true"] { background: var(--rosso-tint); color: var(--rosso); }
+.pane { padding: 20px; display: grid; gap: 14px; min-height: 320px; align-content: start; }
+.search { display: flex; flex-wrap: wrap; gap: 8px; }
+.search input { flex: 1 1 260px; min-width: 0; font: 15px var(--body); padding: 11px 14px; border: 1px solid var(--rule); border-radius: 10px; background: var(--soft); color: var(--ink); }
+.search input:focus { outline: none; border-color: var(--rosso); background: var(--panel); }
+.btn { font: 600 14px var(--display); padding: 10px 18px; border-radius: 10px; border: 1px solid var(--rosso); background: var(--rosso); color: var(--panel); cursor: pointer; }
+.btn.y { background: var(--giallo-tint); border-color: var(--giallo); color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); cursor: pointer; }
+.chip:hover { border-color: var(--rosso); color: var(--rosso); background: var(--rosso-tint); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--giallo); outline-offset: 2px; }
+.hit { border: 1px solid var(--rule); border-left: 3px solid var(--rosso); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+.hit .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.file { font: 600 15px var(--display); color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; }
+.file:hover { color: var(--rosso); }
+.tag { font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 6px; background: var(--giallo-tint); color: var(--tag-ink); }
+.ok { font: 600 11px var(--display); text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 6px; background: var(--green-tint); color: var(--green); }
+.rel { margin-left: auto; font: 600 13px var(--display); color: var(--rosso); }
+.passage { font-size: 14px; color: var(--muted); }
+.passage mark { background: var(--giallo-tint); color: var(--ink); padding: 0 3px; border-radius: 3px; box-shadow: inset 0 -2px 0 var(--giallo); }
+.doc { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 14px; }
+.box { border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 0; }
+dt { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+dd { margin: 0; font: 600 15px var(--body); overflow-wrap: anywhere; }
+ul.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.checks li { display: flex; gap: 10px; align-items: center; font-size: 14px; }
+ul.checks li::before { content: "\2713"; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--green-tint); color: var(--green); font-size: 12px; font-weight: 700; flex: none; }
+.chat { display: grid; gap: 10px; }
+.msg { padding: 11px 14px; border-radius: 12px; font-size: 15px; max-width: 85%; }
+.msg.u { background: var(--rosso-tint); justify-self: end; border-bottom-right-radius: 4px; }
+.msg.a { background: var(--soft); border: 1px solid var(--rule); border-bottom-left-radius: 4px; }
+.msg .src { display: block; margin-top: 6px; font: 600 12px var(--display); color: var(--rosso); }
+.trace { font-size: 12px; color: var(--muted); padding-left: 10px; border-left: 2px solid var(--giallo); }
+.types { display: flex; flex-wrap: wrap; gap: 6px; }
+.types span { font: 500 13px var(--body); padding: 6px 10px; border-radius: 8px; background: var(--soft); border: 1px solid var(--rule); }
+.types b { color: var(--rosso); margin-left: 4px; }
+
+.trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.trust span { display: inline-flex; gap: 8px; align-items: center; font: 600 14px var(--body); padding: 8px 14px; border-radius: 999px; background: var(--panel); border: 1px solid var(--rule); }
+.trust .ic { width: 18px; height: 18px; color: var(--green); }
+
+.met { background: var(--green-tint); color: var(--green); }
+.close { background: var(--giallo-tint); color: var(--tag-ink); }
+
+.road { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.stop { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 18px; display: flex; gap: 14px; align-items: center; }
+.stop .ic { width: 44px; height: 44px; padding: 9px; border-radius: 12px; background: var(--giallo-tint); color: var(--tag-ink); }
+.stop b { display: block; font: 700 15px var(--display); }
+.stop span { font-size: 13px; color: var(--muted); }
+footer { padding-block: 22px; background: var(--panel); color: var(--muted); font-size: 13px; border-top: 1px solid var(--rule); }
+footer .inner { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+footer b { color: var(--rosso); font-family: var(--display); }
+
+/* what it reads */
+.types-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+.dt { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 8px; display: grid; justify-items: center; gap: 8px; text-align: center; font: 600 13.5px var(--body); }
+.dt .ic { width: 40px; height: 40px; padding: 8px; border-radius: 12px; background: var(--rosso-tint); color: var(--rosso); }
+.dt:nth-child(even) .ic { background: var(--giallo-tint); color: var(--tag-ink); }
+.formats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+.formats span { font: 600 12px var(--display); letter-spacing: .06em; padding: 5px 12px; border-radius: 999px; background: var(--soft); border: 1px solid var(--rule); color: var(--muted); }
+.formats .lang { background: var(--giallo-tint); border-color: var(--giallo); color: var(--tag-ink); }
+
+/* who uses it */
+.people { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.person { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 18px 14px; display: grid; justify-items: center; gap: 10px; text-align: center; }
+.avatar { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--rosso-tint), var(--giallo-tint)); color: var(--rosso); }
+.avatar .ic { width: 28px; height: 28px; }
+.person b { font: 700 15px var(--display); }
+.bubble { font-size: 13px; color: var(--ink); background: var(--soft); border-radius: 12px 12px 12px 4px; padding: 8px 10px; }
+
+/* accuracy bars in demo */
+.abars { display: grid; gap: 7px; }
+.abar { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 2.6rem; gap: 8px; align-items: center; font-size: 13px; }
+.abar .tr { height: 9px; background: var(--soft); border-radius: 5px; overflow: hidden; }
+.abar .tr i { display: block; height: 100%; border-radius: 5px; background: var(--rosso); opacity: .8; }
+.abar b { font: 700 13px var(--display); text-align: right; }
+.insgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+/* use case header strip */
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.meta span { display: inline-flex; gap: 8px; align-items: center; background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px 6px 8px; font-size: 13px; }
+.meta .ic { width: 22px; height: 22px; padding: 3px; border-radius: 50%; background: var(--rosso-tint); color: var(--rosso); }
+.meta small { color: var(--muted); font-size: 12px; margin-right: 2px; }
+.meta b { font-weight: 600; }
+
+/* capabilities */
+.caps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.cap { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: center; }
+.cap .ic { width: 42px; height: 42px; padding: 9px; border-radius: 12px; background: var(--rosso-tint); color: var(--rosso); }
+.cap.next .ic { background: var(--soft); color: var(--muted); }
+.cap b { display: block; font: 700 15px var(--display); }
+.cap .st { display: inline-block; margin-top: 4px; font: 600 10.5px var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+.st.live { background: var(--green-tint); color: var(--green); }
+.st.soon { background: var(--giallo-tint); color: var(--tag-ink); }
+.st.fut { background: var(--soft); color: var(--muted); border: 1px dashed var(--rule); }
+
+.note { font-size: 12.5px; color: var(--muted); }
+
+/* use case slide */
+.slide { background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 10px; box-shadow: 0 18px 40px -30px rgba(40, 45, 60, .45); }
+.slide img { display: block; width: 100%; height: auto; border-radius: 10px; }
+
+/* storage optimisation */
+.sflow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; position: relative; }
+.sflow::before { content: ""; position: absolute; left: 10%; right: 10%; top: 30px; border-top: 2px dashed var(--rosso-mid); }
+.sstep { position: relative; display: grid; justify-items: center; gap: 8px; text-align: center; }
+.sstep .tile { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: var(--panel); border: 1px solid var(--rosso-mid); color: var(--rosso); }
+.sstep .tile .ic { width: 28px; height: 28px; }
+.sstep.fut .tile { border-style: dashed; border-color: var(--rule); color: var(--muted); }
+.sstep b { font: 700 14px var(--display); }
+.sstep span { font-size: 12.5px; color: var(--muted); }
+.stacks { display: grid; gap: 12px; margin-top: 22px; background: var(--panel); border: 1px solid var(--rule); border-radius: 16px; padding: 18px 20px; }
+.srow { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 12px; align-items: center; font: 600 14px var(--display); }
+.sbar { display: flex; height: 30px; border-radius: 8px; overflow: hidden; gap: 3px; }
+.sbar i { display: grid; place-items: center; font: 600 11px var(--body); font-style: normal; color: var(--ink); white-space: nowrap; overflow: hidden; }
+.sbar .act { background: var(--rosso-mid); }
+.sbar .dup { background: repeating-linear-gradient(45deg, var(--rosso-tint) 0 6px, var(--panel) 6px 12px); color: var(--rosso); }
+.sbar .old { background: var(--giallo-tint); }
+.sbar .arc { background: var(--soft); color: var(--muted); }
+.sbar .gap { background: transparent; border: 2px dashed var(--green); color: var(--green); border-radius: 8px; }
+.slegend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); }
+.slegend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* key dates demo tab */
+.dcounts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.dc { border: 1px solid var(--rule); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+.dc b { font: 700 1.5rem/1 var(--display); }
+.dc span { font-size: 12px; color: var(--muted); }
+.dc.over { border-color: var(--rosso-mid); background: var(--rosso-tint); }
+.dc.over b { color: var(--rosso); }
+.dc.soon { border-color: var(--giallo); background: var(--giallo-tint); }
+.dlist { display: grid; gap: 8px; }
+.drow { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) auto; gap: 12px; align-items: center; border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 10px; padding: 10px 12px; }
+.drow.over { border-left-color: var(--rosso); }
+.drow.soon { border-left-color: var(--giallo); }
+.drow small { display: block; font-size: 12px; color: var(--muted); }
+.dd { font: 600 14px var(--display); }
+.drow.over .dd small { color: var(--rosso); }
+.dw b { font-weight: 600; }
+.team { font: 600 11px var(--display); letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--muted); }
+
+/* storage demo tab */
+.dupgroup { display: grid; gap: 8px; }
+.copy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.copy.master { border-color: var(--green); background: var(--green-tint); }
+.copy .src2 { color: var(--muted); font-size: 12.5px; }
+.copy .act2 { margin-left: auto; font: 600 11px var(--display); letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--soft); color: var(--muted); }
+.copy.master .act2 { background: var(--panel); color: var(--green); }
+.example { font: 600 11px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--tag-ink); background: var(--giallo-tint); padding: 2px 8px; border-radius: 6px; justify-self: start; }
+
+/* KPI cards: 8 equal cards, 4 per row; pillar tag on top, best practice + status on one line at the bottom */
+.kgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kc { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 6px; min-height: 148px; }
+.kc .pil { display: inline-flex; align-items: center; gap: 6px; font: 700 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--rosso); }
+.kc .pil .ic { width: 14px; height: 14px; }
+.kc .nm { font-size: 13.5px; color: var(--muted); }
+.kc .val { font: 700 1.45rem/1.1 var(--display); align-self: start; }
+.kc .val.pending { color: var(--muted); font-weight: 600; font-size: 1.1rem; }
+.kc .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.kc .foot b { color: var(--ink); font-weight: 600; }
+.badge { font: 600 10.5px var(--display); letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.badge.met { background: var(--green-tint); color: var(--green); }
+.badge.close { background: var(--giallo-tint); color: var(--tag-ink); }
+.badge.later { background: var(--soft); color: var(--muted); }
+
+/* gentle pulse travelling along the five steps */
+@media (prefers-reduced-motion: no-preference) {
+  .node .ring { animation: lap 7.5s ease-in-out infinite; }
+  .node:nth-child(2) .ring { animation-delay: 1.5s; }
+  .node:nth-child(3) .ring { animation-delay: 3s; }
+  .node:nth-child(4) .ring { animation-delay: 4.5s; }
+  .node:nth-child(5) .ring { animation-delay: 6s; }
+}
+@keyframes lap { 0%, 22%, 100% { transform: scale(1); background: var(--panel); } 8% { transform: scale(1.08); background: var(--rosso-tint); } }
+
+@media (max-width: 860px) {
+  .types-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .caps { grid-template-columns: minmax(0, 1fr); }
+  .kgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dcounts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .drow { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .sflow { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .sflow::before { left: 50%; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 2px dashed var(--rosso-mid); }
+  .srow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .people, .insgrid { grid-template-columns: minmax(0, 1fr); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ba { grid-template-columns: minmax(0, 1fr); }
+  .arrow { justify-self: center; transform: rotate(90deg); }
+  .track { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .track::before { left: 50%; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 3px dashed var(--rosso-mid); }
+  .doc, .road { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-files" viewBox="0 0 24 24"><path d="M8 3h7l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M15 3v4h4"/><path d="M4 7v12a2 2 0 0 0 2 2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h1M10 10h1M14 10h1M17.5 10h.5M7 14h10"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 10h8M8 14h5"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.2-5.5 6.5-5.5s5.9 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .8 3.2 2.6 3.5 5.2"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-invoice" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 11.5h6M9 15h3"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M7 3h10v18l-2.5-1.5L12 21l-2.5-1.5L7 21z"/><path d="M9.5 8h5M9.5 11h5M9.5 14h3"/></symbol>
+  <symbol id="i-contract" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M8.5 11h7M8.5 14h4"/><path d="M9 18c1-1.5 2-1.5 3 0s2 1.5 3 0"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M7 20h10M5 7h14"/><path d="M5 7l-2.5 6a2.5 2.5 0 0 0 5 0zM19 7l-2.5 6a2.5 2.5 0 0 0 5 0z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17v.01"/></symbol>
+  <symbol id="i-stamp" viewBox="0 0 24 24"><path d="M9.5 13.5V10a2.5 2.5 0 1 1 5 0v3.5"/><path d="M5 13.5h14v3.5H5zM7 20h10"/></symbol>
+  <symbol id="i-badge" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5L7 21l5-2.5 5 2.5-1.5-7.5"/></symbol>
+  <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.5-1.5 1.6-2.3 3-2.3s2.5.8 3 2.3M14 10h4M14 13.5h3"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6l8.5 7 8.5-7"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10.5h6M7 13.5h4"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12.5h18"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.5-7.5-10A4.3 4.3 0 0 1 12 7.5 4.3 4.3 0 0 1 19.5 10c0 5.5-7.5 10-7.5 10z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c.8-4 3.8-6.5 7.5-6.5s6.7 2.5 7.5 6.5"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5l8-2v18M12 8l8 2v11M3 21h18M7 8h2M7 12h2M7 16h2M15 13h2M15 17h2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 6h14M5 10h14M5 14h9M5 18h6"/><path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8z"/></symbol>
+  <symbol id="i-hourglass" viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9"/></symbol>
+  <symbol id="i-finger" viewBox="0 0 24 24"><path d="M12 4a7 7 0 0 0-7 7v2M19 11a7 7 0 0 0-3.5-6.06"/><path d="M9 12a3 3 0 0 1 6 0v3c0 2 .5 3.5 1.5 5"/><path d="M12 12v4c0 2-.6 3.6-1.8 5M6.5 16c.3 1.6.3 3-.5 4.5"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="i-broom" viewBox="0 0 24 24"><path d="M15 3l-4.5 9"/><path d="M8 12h6l2 8H6z"/><path d="M9 16v4M12 16v4"/></symbol>
+</svg>
+
+<header class="hero gutter">
+  <div class="inner">
+    <span class="label">AI use case · Data cleansing &amp; document digitisation</span>
+    <h1>Every document. <em>Found in a second.</em></h1>
+    <div class="meta" aria-label="Use case details">
+      <span><svg class="ic"><use href="#i-building"/></svg><small>Entity</small><b>Legal Dept / Operations</b></span>
+      <span><svg class="ic"><use href="#i-folder"/></svg><small>Domain</small><b>Records</b></span>
+      <span><svg class="ic"><use href="#i-person"/></svg><small>Owner</small><b>Legal Head</b></span>
+      <span><svg class="ic"><use href="#i-flag"/></svg><small>Stage</small><b>Selection &amp; Pilot</b></span>
+      <span><svg class="ic"><use href="#i-calendar"/></svg><small>Scaling</small><b>Q4 2026</b></span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><svg class="ic"><use href="#i-files"/></svg><div><b>100%</b><span>digitised</span></div></div>
+      <div class="kpi"><svg class="ic"><use href="#i-check"/></svg><div><b>94%</b><span>fields exact</span></div></div>
+      <div class="kpi"><svg class="ic"><use href="#i-bolt"/></svg><div><b>&lt;1s</b><span>to find</span></div></div>
+      <div class="kpi"><svg class="ic"><use href="#i-grid"/></svg><div><b>Any</b><span>document type</span></div></div>
+    </div>
+  </div>
+</header>
+
+<section class="band gutter">
+  <div class="inner">
+    <div class="head"><span class="label">The use case</span><h2>Data cleansing &amp; document digitisation</h2></div>
+    <div class="slide"><img src="usecase-slide.webp" alt="AI use case slide: Data Cleansing and Document Digitization. Entity Legal Dept/Operations, domain Records, owner Legal Head, stage Selection and Pilot, scaling Q4 2026. Objective, key users, additional details, future releases and KPI targets by programme pillar." loading="lazy"></div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">The change</span><h2>From searching to finding</h2></div>
+    <div class="ba">
+      <div class="side">
+        <h3>Today</h3>
+        <div class="icons">
+          <div class="ib"><svg class="ic"><use href="#i-files"/></svg>Scattered files</div>
+          <div class="ib"><svg class="ic"><use href="#i-search"/></svg>Manual search</div>
+          <div class="ib"><svg class="ic"><use href="#i-keyboard"/></svg>Retyping</div>
+          <div class="ib"><svg class="ic"><use href="#i-clock"/></svg>Missed expiries</div>
+        </div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="side after">
+        <h3>With Records</h3>
+        <div class="icons">
+          <div class="ib"><svg class="ic"><use href="#i-db"/></svg>One place</div>
+          <div class="ib"><svg class="ic"><use href="#i-bolt"/></svg>Found in 1s</div>
+          <div class="ib"><svg class="ic"><use href="#i-sparkle"/></svg>Auto-filled</div>
+          <div class="ib"><svg class="ic"><use href="#i-check"/></svg>Auto-checked</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">What it reads</span><h2>Every kind of document, any format</h2></div>
+    <div class="types-grid">
+      <div class="dt"><svg class="ic"><use href="#i-invoice"/></svg>Invoice</div>
+      <div class="dt"><svg class="ic"><use href="#i-receipt"/></svg>Receipt</div>
+      <div class="dt"><svg class="ic"><use href="#i-contract"/></svg>Contract</div>
+      <div class="dt"><svg class="ic"><use href="#i-scale"/></svg>Court judgment</div>
+      <div class="dt"><svg class="ic"><use href="#i-alert"/></svg>Legal notice</div>
+      <div class="dt"><svg class="ic"><use href="#i-stamp"/></svg>Power of attorney</div>
+      <div class="dt"><svg class="ic"><use href="#i-badge"/></svg>Trade licence</div>
+      <div class="dt"><svg class="ic"><use href="#i-id"/></svg>ID document</div>
+      <div class="dt"><svg class="ic"><use href="#i-mail"/></svg>Letter</div>
+      <div class="dt"><svg class="ic"><use href="#i-card"/></svg>Business card</div>
+      <div class="dt"><svg class="ic"><use href="#i-briefcase"/></svg>Asset undertaking</div>
+      <div class="dt"><svg class="ic"><use href="#i-plus"/></svg>Any other</div>
+    </div>
+    <div class="formats"><span>PDF</span><span>SCAN</span><span>PHOTO</span><span>WORD</span><span>POWERPOINT</span><span class="lang">ENGLISH + ARABIC</span></div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Capabilities</span><h2>What the AI does</h2></div>
+    <div class="caps">
+      <div class="cap"><svg class="ic"><use href="#i-scan"/></svg><div><b>OCR, NLP &amp; classification</b><span class="st live">Live</span></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-broom"/></svg><div><b>Extract, validate &amp; cleanse</b><span class="st live">Live</span></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-tag"/></svg><div><b>Tag, index &amp; enrich metadata</b><span class="st live">Live</span></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-text"/></svg><div><b>AI summaries</b><span class="st live">Live</span></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-copy"/></svg><div><b>De-duplicate, archive &amp; optimise storage</b></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-clock"/></svg><div><b>Expiry &amp; deadline alerts</b><span class="st live">Live</span></div></div>
+      <div class="cap"><svg class="ic"><use href="#i-bolt"/></svg><div><b>Auto-processing on arrival</b><span class="st live">Live</span></div></div>
+      <div class="cap next"><svg class="ic"><use href="#i-hourglass"/></svg><div><b>Retention &amp; disposal advice</b><span class="st fut">Future release</span></div></div>
+    </div>
+    <div class="trust">
+      <span><svg class="ic"><use href="#i-lock"/></svg>Secure per user</span>
+      <span><svg class="ic"><use href="#i-plus"/></svg>New types by config</span>
+      <span><svg class="ic"><use href="#i-check"/></svg>Quality measured</span>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Storage optimisation</span><h2>Store less, keep what matters</h2></div>
+    <div class="sflow">
+      <div class="sstep"><div class="tile"><svg class="ic"><use href="#i-finger"/></svg></div><b>Fingerprint</b><span>every file gets a unique ID</span></div>
+      <div class="sstep"><div class="tile"><svg class="ic"><use href="#i-copy"/></svg></div><b>Spot duplicates</b><span>same file, many copies</span></div>
+      <div class="sstep"><div class="tile"><svg class="ic"><use href="#i-star"/></svg></div><b>Keep one master</b><span>copies linked, not stored</span></div>
+      <div class="sstep"><div class="tile"><svg class="ic"><use href="#i-archive"/></svg></div><b>Archive</b><span>inactive files to low-cost tier</span></div>
+      <div class="sstep fut"><div class="tile"><svg class="ic"><use href="#i-hourglass"/></svg></div><b>Retain or dispose</b><span>AI advice · future release</span></div>
+    </div>
+    <div class="stacks" role="img" aria-label="Illustration: before, all files including duplicates and inactive files sit in active storage; after, duplicates are removed and inactive files move to archive, freeing space.">
+      <div class="srow"><span>Before</span><div class="sbar"><i class="act" style="flex:5">Active</i><i class="dup" style="flex:2">Duplicates</i><i class="old" style="flex:3">Inactive</i></div></div>
+      <div class="srow"><span>After</span><div class="sbar"><i class="act" style="flex:5">Active</i><i class="arc" style="flex:1.5">Archive</i><i class="gap" style="flex:3.5">Space freed</i></div></div>
+      <div class="slegend"><span><i style="background:var(--rosso-mid)"></i>Active storage</span><span><i style="background:var(--giallo-tint)"></i>Rarely used</span><span><i style="background:var(--soft)"></i>Low-cost archive</span><span>Illustrative, not to scale</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">How it works</span><h2>Five steps, one receipt</h2></div>
+    <div class="track">
+      <div class="node"><div class="ring"><svg class="ic"><use href="#i-upload"/></svg></div><span class="n">1</span><h3>Upload</h3><div class="card"><span class="photo"><svg class="ic"><use href="#i-camera"/></svg>receipt photo</span></div></div>
+      <div class="node"><div class="ring"><svg class="ic"><use href="#i-scan"/></svg></div><span class="n">2</span><h3>Read</h3><div class="card"><div class="mini"><i></i><i></i><i></i></div></div></div>
+      <div class="node"><div class="ring"><svg class="ic"><use href="#i-tag"/></svg></div><span class="n">3</span><h3>Understand</h3><div class="card"><span><span class="tagy">Receipt</span><br><b>AED 75.02</b></span></div></div>
+      <div class="node"><div class="ring"><svg class="ic"><use href="#i-check"/></svg></div><span class="n">4</span><h3>Check</h3><div class="card"><span>71.45 + 3.57 = 75.02<br><span class="okc">✓ passed</span></span></div></div>
+      <div class="node"><div class="ring"><svg class="ic"><use href="#i-chat"/></svg></div><span class="n">5</span><h3>Find &amp; ask</h3><div class="card"><span><b>Found</b> in &lt;1s</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Live demo</span><h2>Try it</h2></div>
+    <div class="cockpit">
+      <div class="bar" role="tablist" aria-label="Demo screens">
+        <span class="brand">Records</span>
+        <button class="tab" role="tab" id="t-search" aria-selected="true" data-pane="search"><svg class="ic"><use href="#i-search"/></svg>Search</button>
+        <button class="tab" role="tab" id="t-document" aria-selected="false" data-pane="document"><svg class="ic"><use href="#i-files"/></svg>Document</button>
+        <button class="tab" role="tab" id="t-assistant" aria-selected="false" data-pane="assistant"><svg class="ic"><use href="#i-chat"/></svg>Assistant</button>
+        <button class="tab" role="tab" id="t-dates" aria-selected="false" data-pane="dates"><svg class="ic"><use href="#i-calendar"/></svg>Key dates</button>
+        <button class="tab" role="tab" id="t-storage" aria-selected="false" data-pane="storage"><svg class="ic"><use href="#i-archive"/></svg>Storage</button>
+        <button class="tab" role="tab" id="t-insights" aria-selected="false" data-pane="insights"><svg class="ic"><use href="#i-chart"/></svg>Insights</button>
+      </div>
+
+      <div class="pane" id="p-search" role="tabpanel" aria-labelledby="t-search">
+        <form class="search" id="searchForm">
+          <input id="q" type="search" value="termination notice period" aria-label="Search records">
+          <button class="btn" type="submit">Search</button>
+        </form>
+        <div class="chips">
+          <button class="chip" type="button" data-q="termination notice period">termination notice period</button>
+          <button class="chip" type="button" data-q="who can act on behalf of Al Noor">who can act for Al Noor</button>
+          <button class="chip" type="button" data-q="supermarket purchase paid by card">supermarket paid by card</button>
+          <button class="chip" type="button" data-q="licence expiry">licence expiry</button>
+        </div>
+        <div id="results" class="chat"></div>
+      </div>
+
+      <div class="pane" id="p-document" role="tabpanel" aria-labelledby="t-document" hidden>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <h3 style="font-size:1.25rem">Records Management Service Agreement</h3>
+          <span class="tag">Contract</span><span class="ok">Passed</span>
+          <span style="margin-left:auto;display:flex;gap:8px"><button class="btn" type="button">Open original</button><button class="btn y" type="button">Download</button></span>
+        </div>
+        <div class="doc">
+          <div class="box">
+            <dl>
+              <dt>Value</dt><dd>AED 444,000</dd>
+              <dt>Term</dt><dd>Nov 2026 – Oct 2028</dd>
+              <dt>Notice</dt><dd>90 days</dd>
+              <dt>Auto-renews</dt><dd>Yes</dd>
+            </dl>
+          </div>
+          <div class="box">
+            <ul class="checks"><li>Details complete</li><li>Both parties</li><li>Dates valid</li><li>Signed</li></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" id="p-assistant" role="tabpanel" aria-labelledby="t-assistant" hidden>
+        <div class="chips">
+          <button class="chip" type="button" data-a="0">Notice to end the records agreement?</button>
+          <button class="chip" type="button" data-a="1">What expires in 12 months?</button>
+          <button class="chip" type="button" data-a="2">What did the court award?</button>
+        </div>
+        <div class="chat" id="chat"></div>
+      </div>
+
+      <div class="pane" id="p-dates" role="tabpanel" aria-labelledby="t-dates" hidden>
+        <div class="dcounts">
+          <div class="dc over"><b>2</b><span>Overdue</span></div>
+          <div class="dc soon"><b>0</b><span>Within 30 days</span></div>
+          <div class="dc soon"><b>2</b><span>Within 90 days</span></div>
+          <div class="dc"><b>1</b><span>Within 12 months</span></div>
+        </div>
+        <div class="dlist">
+          <div class="drow over"><span class="dd">27 Oct 2026<small>9 days overdue</small></span><span class="dw"><b>Letter deadline</b><small>Archive retrieval request</small></span><span class="team">Admin</span></div>
+          <div class="drow over"><span class="dd">29 Oct 2026<small>7 days overdue</small></span><span class="dw"><b>Notice deadline</b><small>Desert Rose Contracting</small></span><span class="team">Legal</span></div>
+          <div class="drow soon"><span class="dd">15 Dec 2026<small>in 40 days</small></span><span class="dw"><b>Court hearing</b><small>Al Noor v Desert Rose</small></span><span class="team">Legal</span></div>
+          <div class="drow soon"><span class="dd">14 Jan 2027<small>in 70 days</small></span><span class="dw"><b>Licence expiry</b><small>Gulf Horizon Trading</small></span><span class="team">Compliance</span></div>
+        </div>
+        <p class="note"><svg class="ic" style="width:14px;height:14px;vertical-align:-2px"><use href="#i-mail"/></svg> Weekly email every Monday 08:00 lists anything overdue or due within 90 days.</p>
+      </div>
+
+      <div class="pane" id="p-storage" role="tabpanel" aria-labelledby="t-storage" hidden>
+        <span class="example">Example</span>
+        <div class="insgrid">
+          <div class="box">
+            <h3>Duplicate found · Invoice INV-30013</h3>
+            <div class="dupgroup">
+              <div class="copy master"><svg class="ic" style="width:18px;height:18px;color:var(--green)"><use href="#i-star"/></svg><b>Invoice_BioHue_Chemicals_13.pdf</b><span class="src2">Records library</span><span class="act2">Master kept</span></div>
+              <div class="copy"><svg class="ic" style="width:18px;height:18px"><use href="#i-mail"/></svg>Invoice_BioHue_13 (1).pdf<span class="src2">Email attachment</span><span class="act2">Linked</span></div>
+              <div class="copy"><svg class="ic" style="width:18px;height:18px"><use href="#i-scan"/></svg>scan_0042.pdf<span class="src2">Shared drive scan</span><span class="act2">Linked</span></div>
+            </div>
+          </div>
+          <div class="box">
+            <h3>Archive candidates</h3>
+            <div class="dupgroup">
+              <div class="copy"><svg class="ic" style="width:18px;height:18px"><use href="#i-receipt"/></svg>Paid invoices<span class="src2">not opened in 24 months</span><span class="act2">Archive</span></div>
+              <div class="copy"><svg class="ic" style="width:18px;height:18px"><use href="#i-contract"/></svg>Expired contracts<span class="src2">term ended</span><span class="act2">Archive</span></div>
+              <div class="copy"><svg class="ic" style="width:18px;height:18px"><use href="#i-hourglass"/></svg>Past retention period<span class="src2">future release</span><span class="act2">Review</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" id="p-insights" role="tabpanel" aria-labelledby="t-insights" hidden>
+        <div class="insgrid">
+          <div class="box">
+            <h3>Documents by type</h3>
+            <div class="types"><span>Invoice<b>33</b></span><span>Contract<b>1</b></span><span>Court judgment<b>1</b></span><span>Legal notice<b>1</b></span><span>Power of attorney<b>1</b></span><span>Trade licence<b>1</b></span><span>ID<b>1</b></span><span>Receipt<b>1</b></span><span>Letter<b>1</b></span><span>Business card<b>1</b></span><span>Asset undertaking<b>1</b></span></div>
+          </div>
+          <div class="box">
+            <h3>Accuracy by type</h3>
+            <div class="abars">
+              <div class="abar"><span>Invoice</span><div class="tr"><i style="width:100%"></i></div><b>100%</b></div>
+              <div class="abar"><span>ID document</span><div class="tr"><i style="width:100%"></i></div><b>100%</b></div>
+              <div class="abar"><span>Trade licence</span><div class="tr"><i style="width:100%"></i></div><b>100%</b></div>
+              <div class="abar"><span>Contract</span><div class="tr"><i style="width:83%"></i></div><b>83%</b></div>
+              <div class="abar"><span>Power of attorney</span><div class="tr"><i style="width:80%"></i></div><b>80%</b></div>
+              <div class="abar"><span>Court judgment</span><div class="tr"><i style="width:71%"></i></div><b>71%</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Who uses it</span><h2>One tool, four teams</h2></div>
+    <div class="people">
+      <div class="person"><div class="avatar"><svg class="ic"><use href="#i-scale"/></svg></div><b>Legal</b><span class="bubble">“Notice period in this contract?”</span></div>
+      <div class="person"><div class="avatar"><svg class="ic"><use href="#i-briefcase"/></svg></div><b>Admin &amp; Finance</b><span class="bubble">“Spend with this vendor?”</span></div>
+      <div class="person"><div class="avatar"><svg class="ic"><use href="#i-heart"/></svg></div><b>HR</b><span class="bubble">“Whose ID expires soon?”</span></div>
+      <div class="person"><div class="avatar"><svg class="ic"><use href="#i-check"/></svg></div><b>Compliance</b><span class="bubble">“Which licences lapse this year?”</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Pilot results</span><h2>Against best practice</h2></div>
+    <div class="kgrid">
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-bolt"/></svg>Productivity</span><span class="nm">Document retrieval time</span><span class="val">&lt; 1 s</span><span class="foot"><span>Best practice <b>1 min</b></span><span class="badge met">Met</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-bolt"/></svg>Productivity</span><span class="nm">Storage costs</span><span class="val pending">To measure</span><span class="foot"><span>Best practice <b>$40k</b></span><span class="badge later">At rollout</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-bolt"/></svg>Productivity</span><span class="nm">Manual data entry effort</span><span class="val">Automated</span><span class="foot"><span>Best practice <b>&minus;60%</b></span><span class="badge later">At rollout</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-sparkle"/></svg>Experience</span><span class="nm">Search success rate</span><span class="val pending">To measure</span><span class="foot"><span>Best practice <b>98%</b></span><span class="badge later">At rollout</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-users"/></svg>Adoption</span><span class="nm">Documents digitised</span><span class="val">100%</span><span class="foot"><span>Best practice <b>75%</b></span><span class="badge met">Met</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-users"/></svg>Adoption</span><span class="nm">Users accessing system</span><span class="val">Open to all</span><span class="foot"><span>Best practice <b>500</b></span><span class="badge later">At rollout</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-check"/></svg>Compliance</span><span class="nm">Record accuracy</span><span class="val">94%</span><span class="foot"><span>Best practice <b>98%</b></span><span class="badge close">Close</span></span></div>
+      <div class="kc"><span class="pil"><svg class="ic"><use href="#i-tag"/></svg>Specific</span><span class="nm">Search success rate</span><span class="val pending">To measure</span><span class="foot"><span>Best practice <b>+95%</b></span><span class="badge later">At rollout</span></span></div>
+    </div>
+    <p class="note" style="margin-top:12px">Pilot on sample documents. 2026 baseline and targets are not yet set (N/A on the use case).</p>
+  </div>
+</section>
+
+<section class="band gutter" style="padding-top:0">
+  <div class="inner">
+    <div class="head"><span class="label">Next</span><h2>Road to Q4 2026</h2></div>
+    <div class="road">
+      <div class="stop"><svg class="ic"><use href="#i-users"/></svg><div><b>Go live</b><span>real records, all teams</span></div></div>
+      <div class="stop"><svg class="ic"><use href="#i-chart"/></svg><div><b>Prove value</b><span>time &amp; effort saved</span></div></div>
+      <div class="stop"><svg class="ic"><use href="#i-coin"/></svg><div><b>Set baselines</b><span>storage, effort, adoption</span></div></div>
+      <div class="stop"><svg class="ic"><use href="#i-chat"/></svg><div><b>Email &amp; Teams</b><span>forward to digitise, ask in Teams</span></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="gutter">
+  <div class="inner"><span><b>Records Intelligence</b> · Legal / Operations pilot</span><span>Sample documents · pilot figures</span></div>
+</footer>
+
+<script>
+(function () {
+  var DOCS = {
+    contract: ["06-service-agreement.pdf", "Contract"], notice: ["07-legal-notice.png", "Legal notice"],
+    poa: ["09-power-of-attorney.png", "Power of attorney"], licence: ["10-trade-licence-specimen.png", "Trade licence"],
+    receipt: ["03-receipt.jpg", "Receipt"], invoice: ["02-invoice-phone-scan.jpg", "Invoice"]
+  };
+  var SEARCH = {
+    "termination notice period": [
+      ["contract", 99, "…unless either party gives at least <mark>ninety (90) days' written notice</mark> of non-renewal…"],
+      ["notice", 97, "…pay the outstanding amount <mark>within 15 days</mark> of this notice…"],
+      ["invoice", 47, "Terms: payment <mark>within 45 days</mark> of invoice date."]],
+    "who can act on behalf of al noor": [
+      ["poa", 92, "Khalid Rahman, for <mark>Al Noor Legal Services</mark>, appoints Mariam Al Hashimi as attorney…"],
+      ["notice", 64, "Hassan &amp; Partners, on behalf of <mark>Al Noor Legal Services</mark>…"]],
+    "supermarket purchase paid by card": [
+      ["receipt", 95, "AL WAHA <mark>SUPERMARKET</mark> · Total AED 75.02 · paid by <mark>VISA</mark>"]],
+    "licence expiry": [
+      ["licence", 94, "Licence CN-4471902 · <mark>Expiry 14/01/2027</mark>"],
+      ["poa", 61, "Valid <mark>until 30 Sep 2027</mark>"]]
+  };
+  var ANSWERS = [
+    ["Notice to end the records agreement?", "Searched documents",
+     "90 days' notice before the term ends; 30 days for a material breach.", "06-service-agreement.pdf"],
+    ["What expires in 12 months?", "Checked expiry dates",
+     "Gulf Horizon trade licence (14 Jan 2027) and Mariam Al Hashimi's power of attorney (30 Sep 2027).",
+     "10-trade-licence-specimen.png · 09-power-of-attorney.png"],
+    ["What did the court award?", "Searched documents",
+     "AED 184,500 to Al Noor, plus interest and fees. Next hearing 15 Dec 2026.", "08-court-judgment-scanned.pdf"]
+  ];
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function show(name) {
+    document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.pane === name)); });
+    document.querySelectorAll(".pane").forEach(function (p) { p.hidden = p.id !== "p-" + name; });
+  }
+  document.querySelectorAll(".tab").forEach(function (t) { t.addEventListener("click", function () { show(t.dataset.pane); }); });
+  function search(text) {
+    var box = document.getElementById("results"); box.innerHTML = "";
+    var hits = SEARCH[text.trim().toLowerCase()];
+    if (!hits) { box.appendChild(el("p", "passage", "Pick a suggested search for this demo.")); return; }
+    hits.forEach(function (h) {
+      var d = DOCS[h[0]], r = el("div", "hit"), top = el("div", "top");
+      var f = el("button", "file", d[0]); f.type = "button";
+      f.addEventListener("click", function () { if (h[0] === "contract") show("document"); });
+      top.appendChild(f); top.appendChild(el("span", "tag", d[1])); top.appendChild(el("span", "rel", h[1] + "% match"));
+      r.appendChild(top); r.appendChild(el("p", "passage", h[2])); box.appendChild(r);
+    });
+  }
+  document.getElementById("searchForm").addEventListener("submit", function (e) { e.preventDefault(); search(document.getElementById("q").value); });
+  document.querySelectorAll("[data-q]").forEach(function (c) { c.addEventListener("click", function () { document.getElementById("q").value = c.dataset.q; search(c.dataset.q); }); });
+  search("termination notice period");
+  var chat = document.getElementById("chat");
+  function ask(i) {
+    var x = ANSWERS[i];
+    chat.appendChild(el("div", "msg u", x[0]));
+    chat.appendChild(el("div", "trace", x[1]));
+    var a = el("div", "msg a", x[2]); a.appendChild(el("span", "src", "Source: " + x[3])); chat.appendChild(a);
+  }
+  document.querySelectorAll("[data-a]").forEach(function (c) { c.addEventListener("click", function () { ask(Number(c.dataset.a)); }); });
+  ask(0);
+})();
+</script>

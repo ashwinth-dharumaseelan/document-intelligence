@@ -1,0 +1,13 @@
+{
+  "01-invoice-clean.png": {"issuer_name": "Gulf Horizon Trading LLC", "vendor_tax_id": "100234567800003", "recipient_name": "Al Noor Legal Services FZ-LLC", "document_number": "GHT-2026-0418", "document_date": "2026-10-12", "due_date": "2026-11-11", "subtotal": 2400, "tax_amount": 120, "total_amount": 2520, "currency": "AED"},
+  "02-invoice-phone-scan.jpg": {"issuer_name": "SAHARA OFFICE SUPPLIES L.L.C.", "vendor_tax_id": "100445566700003", "recipient_name": "Gulf Horizon Trading LLC", "document_number": "SOS-55817", "document_date": "2026-09-28", "subtotal": 2370, "tax_amount": 118.5, "total_amount": 2488.5, "due_date": null},
+  "03-receipt.jpg": {"issuer_name": "AL WAHA SUPERMARKET", "document_date": "2026-10-21", "transaction_time": "18:42", "subtotal": 71.45, "tax_amount": 3.57, "total_amount": 75.02},
+  "04-business-card.png": {"contact_name": "Mariam Al Hashimi", "job_title": "Senior Associate, Litigation", "company_name": "HASSAN & PARTNERS ADVOCATES"},
+  "05-id-card-specimen.png": {"full_name": "OMAR KHALID SAMPLE", "document_number": "EXA-1990-4471-2", "date_of_birth": "1990-02-14", "document_date": "2024-05-03", "date_of_expiry": "2029-05-02", "nationality": "Exampleland", "sex": "M"},
+  "06-service-agreement.pdf": {"document_date": "2026-11-01", "end_date": "2028-10-31", "total_amount": 444000, "governing_law": "Dubai"},
+  "07-legal-notice.png": {"issuer_name": "Hassan & Partners Advocates", "recipient_name": "Desert Rose Contracting LLC", "document_date": "2026-10-14", "document_number": "HP/LN/2026/0731", "total_amount": 184500},
+  "08-court-judgment-scanned.pdf": {"issuer_name": "Court of First Instance", "document_number": "2026/1187", "claimant": "Al Noor Legal Services FZ-LLC", "defendant": "Desert Rose Contracting LLC", "document_date": "2026-09-22", "next_hearing_date": "2026-12-15", "total_amount": 184500},
+  "09-power-of-attorney.png": {"grantor": "Khalid Rahman", "attorney": "Mariam Al Hashimi", "valid_from": "2026-10-01", "valid_to": "2027-09-30", "revocable": true},
+  "10-trade-licence-specimen.png": {"document_number": "CN-4471902", "recipient_name": "Gulf Horizon Trading LLC", "legal_form": "Limited Liability Company", "document_date": "2026-01-15", "expiry_date": "2027-01-14", "partners_and_managers": ["Faisal Al Mazrouei", "Daniel Okafor", "Rania Haddad"]},
+  "11-bilingual-letter-ar-en.png": {"issuer_name": "Gulf Horizon Trading LLC", "document_date": "2026-10-20", "document_number": "HP/LN/2026/0731", "deadline_date": "2026-10-27", "signed_by": "Rania Haddad"}
+}

@@ -1,0 +1,113 @@
+@import "@databricks/appkit-ui/styles.css";
+
+/* Records theme: Rosso Corsa (primary), Giallo Modena (highlight), carbon (header). */
+:root {
+  --radius: 0.6rem;
+  --rosso: oklch(0.56 0.23 28);
+  --rosso-deep: oklch(0.47 0.2 28);
+  --giallo: oklch(0.88 0.18 92);
+  --carbon: oklch(0.18 0 0);
+  --carbon-2: oklch(0.23 0 0);
+
+  --background: oklch(0.967 0.002 286);
+  --foreground: oklch(0.17 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0 0);
+  --primary: var(--rosso);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.002 286);
+  --secondary-foreground: oklch(0.17 0 0);
+  --muted: oklch(0.94 0.002 286);
+  --muted-foreground: oklch(0.48 0.008 286);
+  --accent: oklch(0.96 0.06 95);
+  --accent-foreground: oklch(0.17 0 0);
+  --destructive: oklch(0.56 0.23 28);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.62 0.17 152);
+  --success-foreground: oklch(1 0 0);
+  --warning: var(--giallo);
+  --warning-foreground: oklch(0.17 0 0);
+  --border: oklch(0.9 0.003 286);
+  --input: oklch(0.88 0.003 286);
+  --ring: var(--giallo);
+
+  --chart-cat-1: var(--rosso);
+  --chart-cat-2: oklch(0.82 0.17 90);
+  --chart-cat-3: oklch(0.3 0 0);
+  --chart-cat-4: oklch(0.7 0.15 45);
+  --chart-cat-5: oklch(0.6 0.02 286);
+  --chart-cat-6: oklch(0.42 0.17 28);
+  --chart-cat-7: oklch(0.9 0.1 95);
+  --chart-cat-8: oklch(0.5 0.01 286);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: oklch(0.13 0 0);
+    --foreground: oklch(0.96 0 0);
+    --card: oklch(0.19 0 0);
+    --card-foreground: oklch(0.96 0 0);
+    --popover: oklch(0.19 0 0);
+    --popover-foreground: oklch(0.96 0 0);
+    --primary: oklch(0.6 0.23 28);
+    --secondary: oklch(0.25 0 0);
+    --secondary-foreground: oklch(0.96 0 0);
+    --muted: oklch(0.25 0 0);
+    --muted-foreground: oklch(0.7 0.005 286);
+    --accent: oklch(0.3 0.06 95);
+    --accent-foreground: oklch(0.96 0 0);
+    --border: oklch(1 0 0 / 12%);
+    --input: oklch(1 0 0 / 16%);
+    --carbon: oklch(0.08 0 0);
+    --carbon-2: oklch(0.15 0 0);
+  }
+}
+
+body {
+  font-family: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Titillium Web", "Arial Narrow", system-ui, sans-serif;
+  letter-spacing: -0.005em;
+}
+
+/* Carbon header with a red line and a red/yellow brand flash. */
+.f1-header {
+  background: var(--carbon);
+  border-bottom: 3px solid var(--rosso);
+  color: oklch(1 0 0);
+}
+
+.f1-mark {
+  display: inline-block;
+  width: 10px;
+  height: 20px;
+  background: linear-gradient(var(--rosso) 0 70%, var(--giallo) 70%);
+  transform: skewX(-14deg);
+}
+
+/* Page titles get a short racing stripe underneath. */
+.f1-title {
+  display: inline-block;
+  padding-bottom: 6px;
+  background: linear-gradient(90deg, var(--rosso) 0 70%, var(--giallo) 70% 100%) left bottom / 72px 4px no-repeat;
+}
+
+/* Result and KPI cards: red edge marks the item, yellow for highlights. */
+.f1-edge {
+  border-left: 5px solid var(--rosso);
+}
+
+.f1-edge-yellow {
+  border-left: 5px solid var(--giallo);
+}
+
+mark {
+  background: var(--giallo);
+  color: oklch(0.17 0 0);
+  padding: 0 2px;
+  border-radius: 2px;
+}

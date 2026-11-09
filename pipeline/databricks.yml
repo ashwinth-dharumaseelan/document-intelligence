@@ -1,0 +1,23 @@
+bundle:
+  name: doc_intelligence_pipeline
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog holding the bronze / silver / gold schemas
+    default: document_intelligence
+
+targets:
+  dev:
+    # Production mode: triggers stay live so new documents process as soon as they arrive.
+    # root_path is the original dev deployment folder, so existing resources are updated in place.
+    mode: production
+    default: true
+    workspace:
+      host: https://<your-workspace>.cloud.databricks.com
+      root_path: /Workspace/Users/you@example.com/.bundle/doc_intelligence_pipeline/dev
+    permissions:
+      - user_name: you@example.com
+        level: CAN_MANAGE

@@ -1,0 +1,16 @@
+{
+  "name": "document_intelligence.silver.document_chunks_index",
+  "endpoint_name": "doc-intelligence-vs",
+  "primary_key": "chunk_id",
+  "index_type": "DELTA_SYNC",
+  "delta_sync_index_spec": {
+    "source_table": "document_intelligence.silver.document_chunks",
+    "pipeline_type": "TRIGGERED",
+    "embedding_source_columns": [
+      {"name": "chunk_to_embed", "embedding_model_endpoint_name": "databricks-gte-large-en"}
+    ],
+    "columns_to_sync": ["chunk_id", "document_id", "chunk_index", "chunk_to_retrieve", "chunk_to_embed",
+      "file_name", "path", "document_type", "document_number", "document_date",
+      "issuer_name", "recipient_name", "currency", "total_amount"]
+  }
+}

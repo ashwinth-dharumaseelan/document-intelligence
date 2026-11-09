@@ -1,0 +1,34 @@
+resources:
+  jobs:
+    doc_intelligence_auto_process:
+      name: doc_intelligence_auto_process
+      description: Digitise new documents as soon as they land in the documents volume (upload, email intake, app upload).
+      # Fires when files are added anywhere in the volume, including inbox/ subfolders.
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/${var.catalog}/default/document_intelligence_sample/
+          min_time_between_triggers_seconds: 60
+          wait_after_last_change_seconds: 60
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      tasks:
+        - task_key: process_new_documents
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.doc_intelligence_medallion.id}
+            full_refresh: false
+        - task_key: refresh_search_index
+          depends_on:
+            - task_key: process_new_documents
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/jobs/sync_search_index.py
+            parameters:
+              - ${var.catalog}.silver.document_chunks_index
+      environments:
+        - environment_key: default
+          spec:
+            client: "4"
+            dependencies:
+              - databricks-sdk

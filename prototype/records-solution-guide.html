@@ -1,0 +1,374 @@
+<title>Records Solution Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reference guide. Contents strip, then numbered parts in reading order; tables and code scroll inside their own boxes. */
+:root {
+  --rosso: #c8463d; --rosso-tint: #fbeceb; --giallo: #e9b730; --giallo-tint: #fdf6dd;
+  --ground: #fbfbfc; --panel: #ffffff; --soft: #f4f5f7; --ink: #2b2d33; --muted: #6a6e78; --rule: #e5e6ea;
+  --green: #3f8f65; --green-tint: #e8f4ee;
+  --display: "Titillium Web", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --rosso: #e7766d; --rosso-tint: #3a1f1d; --giallo: #e9c060; --giallo-tint: #362e17;
+  --ground: #121316; --panel: #1a1c20; --soft: #22252a; --ink: #e9eaee; --muted: #a2a6b0; --rule: #2e3137;
+  --green: #6cc497; --green-tint: #17301f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --rosso: #e7766d; --rosso-tint: #3a1f1d; --giallo: #e9c060; --giallo-tint: #362e17;
+  --ground: #121316; --panel: #1a1c20; --soft: #22252a; --ink: #e9eaee; --muted: #a2a6b0; --rule: #2e3137;
+  --green: #6cc497; --green-tint: #17301f; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--ground); color: var(--ink); font: 16px/1.62 var(--body); }
+.wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; display: grid; gap: 44px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); }
+h2 { font-size: 1.6rem; display: flex; gap: 12px; align-items: baseline; }
+h2 .n { font: 700 .95rem var(--display); color: var(--rosso); background: var(--rosso-tint); border-radius: 8px; padding: 2px 9px; }
+h3 { font-size: 1.12rem; margin-top: 8px; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+a { color: var(--rosso); }
+code { font: 13.5px var(--mono); background: var(--soft); border: 1px solid var(--rule); border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
+pre { margin: 0; font: 13px/1.55 var(--mono); background: var(--soft); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; overflow-x: auto; color: var(--ink); }
+section { display: grid; gap: 14px; }
+.label { font: 700 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--rosso); }
+.lede { color: var(--muted); font-size: 1.08rem; }
+.hero { display: grid; gap: 12px; border-bottom: 1px solid var(--rule); padding-bottom: 28px; position: relative; }
+.hero::before { content: ""; position: absolute; top: -40px; left: 0; width: 120px; height: 4px; background: linear-gradient(90deg, var(--rosso) 0 75%, var(--giallo) 75%); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+.meta span { font-size: 13px; background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; }
+.meta b { font-weight: 600; }
+.toc { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; }
+.toc ol { columns: 2; column-gap: 32px; display: block; padding-left: 1.4em; }
+.toc li { margin-bottom: 4px; break-inside: avoid; }
+.toc a { color: var(--ink); text-decoration: none; }
+.toc a:hover, .toc a:focus-visible { color: var(--rosso); text-decoration: underline; }
+.tw { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+th { font: 700 11.5px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--soft); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; }
+.note { background: var(--giallo-tint); border-left: 3px solid var(--giallo); border-radius: 8px; padding: 12px 16px; font-size: 15px; }
+.warn { background: var(--rosso-tint); border-left: 3px solid var(--rosso); border-radius: 8px; padding: 12px 16px; font-size: 15px; }
+.steps { list-style: none; padding: 0; display: grid; gap: 0; border-left: 2px solid var(--rule); margin-left: 8px; }
+.steps li { position: relative; padding: 0 0 18px 22px; max-width: none; }
+.steps li::before { content: ""; position: absolute; left: -8px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--panel); border: 3px solid var(--rosso); }
+.steps b { font-family: var(--display); font-size: 1.02rem; }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.box { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.box .k { font: 700 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--rosso); }
+.box b { font-family: var(--display); }
+.box span { font-size: 13.5px; color: var(--muted); }
+.ok { color: var(--green); font-weight: 600; }
+.pill { font: 600 11px var(--display); letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.met { background: var(--green-tint); color: var(--green); }
+.pill.close { background: var(--giallo-tint); color: var(--ink); }
+.pill.later { background: var(--soft); color: var(--muted); border: 1px solid var(--rule); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--rule); padding-top: 18px; }
+@media (max-width: 760px) { .toc ol { columns: 1; } .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="label">AI use case · Data cleansing &amp; document digitisation</span>
+  <h1>Records: how it was built and how it works</h1>
+  <p class="lede">An end-to-end guide to the Records solution on Databricks: from the first connection to the live app, pipelines, automation and alerts. Written for the project team, IT and anyone taking it over.</p>
+  <div class="meta">
+    <span>Entity <b>Legal Dept / Operations</b></span><span>Domain <b>Records</b></span><span>Owner <b>Legal Head</b></span><span>Stage <b>Selection &amp; Pilot</b></span><span>Scaling <b>Q4 2026</b></span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#overview">What Records does</a></li>
+    <li><a href="#journey">How it was built, step by step</a></li>
+    <li><a href="#architecture">Architecture at a glance</a></li>
+    <li><a href="#storage">Storage and governance</a></li>
+    <li><a href="#registry">The document-type registry</a></li>
+    <li><a href="#pipeline">The pipeline</a></li>
+    <li><a href="#quality">Validation and accuracy</a></li>
+    <li><a href="#search">Search, Genie and alerts</a></li>
+    <li><a href="#job">Automatic processing (the job)</a></li>
+    <li><a href="#app">The Records app</a></li>
+    <li><a href="#example">One document, start to finish</a></li>
+    <li><a href="#security">Security and access</a></li>
+    <li><a href="#results">Results against the use case</a></li>
+    <li><a href="#runbook">Running and changing it</a></li>
+    <li><a href="#open">Open items</a></li>
+    <li><a href="#files">Where everything is</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+  <h2><span class="n">1</span>What Records does</h2>
+  <p>Legal and Operations hold records as scans, PDFs, photos and paper. Finding a clause means opening files one by one, key details are retyped by hand, and expiring documents are missed. Records turns every document into searchable, validated data:</p>
+  <ul>
+    <li><b>Reads</b> any document (PDF, scan, phone photo, Word, PowerPoint, English and Arabic) with AI.</li>
+    <li><b>Understands</b> it: works out the document type and extracts the fields that type needs.</li>
+    <li><b>Checks</b> it with business rules: totals add up, dates make sense, nothing expired or duplicated.</li>
+    <li><b>Makes it findable</b>: search by meaning or exact words, an assistant that answers with sources, a library, KPIs.</li>
+    <li><b>Acts on it</b>: a key-dates view and a weekly email for anything overdue or due within 90 days.</li>
+  </ul>
+</section>
+
+<section id="journey">
+  <h2><span class="n">2</span>How it was built, step by step</h2>
+  <ol class="steps">
+    <li><b>Connected to Databricks.</b> Confirmed the Databricks CLI and the <code>DEFAULT</code> login, then explored the workspace: the <code>document_intelligence</code> catalog, the sample volume, an answer key (<code>truth.json</code>) and test notes.</li>
+    <li><b>Built the first pipeline (PDFs only).</b> A medallion pipeline (bronze → silver → gold) for the 33 sample PDFs: parse, clean, classify, extract, validate. Added a vector search index for search by meaning.</li>
+    <li><b>Extended to every file type.</b> Images, Office and text files are routed automatically. Introduced the <b>document-type registry</b>: each type's fields and rules live in configuration, so new types need no code.</li>
+    <li><b>Measured accuracy.</b> Compared every extracted field with the answer key. Found and fixed real errors (a stripped letterhead, a missed licence manager, a print timestamp read as a date, an invented due date).</li>
+    <li><b>Built the app.</b> A Databricks App with Search, Library, Document details, Assistant (chatbot) and Insights, running with each person's own permissions. Added a Genie space for questions over the data.</li>
+    <li><b>Opened it to all users.</b> Granted read access to the business tables and search, and read/upload on the documents folder. Moved the answer key to a private volume.</li>
+    <li><b>Added key dates and alerts.</b> A live view of expiries, renewal-notice deadlines, hearings and deadlines, a Key dates page, and a Monday email.</li>
+    <li><b>Automated processing.</b> A job that runs the pipeline and refreshes search whenever a file arrives. Prepared email intake and wrote the IT steps for email and Teams.</li>
+    <li><b>Added a new type from a real upload.</b> An employee asset undertaking form arrived; added the <code>asset_undertaking</code> type with HR-specific fields and checks.</li>
+    <li><b>Prepared the presentation.</b> A picture-first demo page, platform-neutral, mapped to every item on the use case slide.</li>
+  </ol>
+</section>
+
+<section id="architecture">
+  <h2><span class="n">3</span>Architecture at a glance</h2>
+  <div class="flow">
+    <div class="box"><span class="k">In</span><b>Documents volume</b><span>App upload, manual copy, email intake (planned)</span></div>
+    <div class="box"><span class="k">Automate</span><b>Job</b><span>File-arrival trigger: run pipeline, refresh search</span></div>
+    <div class="box"><span class="k">Process</span><b>Pipeline</b><span>Bronze → silver → gold, AI functions, rules</span></div>
+    <div class="box"><span class="k">Use</span><b>Records app</b><span>Search, Library, Key dates, Assistant, Insights</span></div>
+  </div>
+<pre>
+ Upload / email ──► Volume ──► JOB doc_intelligence_auto_process (on file arrival)
+                                 ├─ 1. PIPELINE doc_intelligence_medallion
+                                 │      bronze (raw) ─► silver (read, classify, extract, chunk) ─► gold (checked)
+                                 └─ 2. refresh SEARCH INDEX
+ gold tables ──► Genie space ─┐
+ key_dates   ──► SQL alert ───┼──► weekly email (Monday 08:00 Dubai)
+ chunks      ──► Vector index ┘
+                     └──────────► APP records-search (each user's own permissions)
+</pre>
+</section>
+
+<section id="storage">
+  <h2><span class="n">4</span>Storage and governance</h2>
+  <p>Everything lives in one Unity Catalog catalog, <code>document_intelligence</code>. Unity Catalog controls who can see what, and keeps lineage and audit history.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Schema</th><th>Contents</th><th>Access</th></tr></thead>
+    <tbody>
+      <tr><td><code>default</code></td><td>Volume <code>document_intelligence_sample</code>: original files, plus <code>inbox/email/</code> for email attachments</td><td>All users: read and upload</td></tr>
+      <tr><td><code>bronze</code></td><td>Raw files as received</td><td>Pipeline only</td></tr>
+      <tr><td><code>silver</code></td><td>Parsed text, document types, extracted fields, search passages</td><td>All users: search passages only</td></tr>
+      <tr><td><code>gold</code></td><td>Validated business tables, KPIs, key dates</td><td>All users: read-only</td></tr>
+      <tr><td><code>config</code></td><td>Document-type registry; private volume <code>reference_files</code> (answer key, test notes)</td><td>Owner only</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="registry">
+  <h2><span class="n">5</span>The document-type registry</h2>
+  <p>The registry tells the AI what each document type is, what to extract and how to check it. It is a JSON file, <code>doc_intelligence_pipeline/config/extraction_schemas.json</code>, loaded into <code>config.extraction_schemas</code> by <code>scripts/load_schema_registry.py</code>. There are 12 types today: invoice, receipt, business card, ID document, contract, legal notice, court judgment, power of attorney, trade licence, letter, asset undertaking and other.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Entry</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>description</td><td>How the AI recognises the type (used by classification)</td></tr>
+      <tr><td>fields</td><td>What to extract, with types (text, number, date, list, line items)</td></tr>
+      <tr><td>instructions</td><td>Extra guidance, e.g. "never calculate a due date from payment terms"</td></tr>
+      <tr><td>validation_rules</td><td>Business checks written as SQL, e.g. subtotal + tax = total</td></tr>
+      <tr><td>gold_table</td><td>The business table the type lands in</td></tr>
+      <tr><td>ground_truth</td><td>How the type's fields map to the answer key, for accuracy scoring</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Core fields</b> are extracted from every document: number, date, issuer, recipient, parties, currency, total amount and language. Each type has a <code>schema_version</code>, bumped on every change, and each record keeps the version that produced it.</p>
+</section>
+
+<section id="pipeline">
+  <h2><span class="n">6</span>The pipeline</h2>
+  <p><code>doc_intelligence_medallion</code> is a Lakeflow Declarative Pipeline on serverless compute. Code: <code>doc_intelligence_pipeline/src/transformations/</code>, files 01 to 13 in run order. <b>Streaming tables</b> (bronze, silver) process each file once, which keeps AI cost flat. <b>Materialized views</b> (gold) are recomputed on every run, so rules and KPIs stay consistent.</p>
+
+  <h3>Bronze: receive</h3>
+  <p><code>bronze.raw_documents</code>: Auto Loader picks up new files in the volume and its sub-folders. Each file is stored with its metadata and a content fingerprint, then routed: <b>ai_parse</b> (PDF, images, Word, PowerPoint), <b>text</b> (txt, csv, html, eml), <b>excluded</b> (answer key, test files) or <b>unsupported</b>. Files starting with <code>_</code> or <code>.</code> are treated as hidden.</p>
+
+  <h3>Silver: read, understand, prepare</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Table</th><th>What happens</th><th>AI function</th></tr></thead>
+    <tbody>
+      <tr><td><code>parsed_documents</code></td><td>OCR and layout: text, tables, headings, in English and Arabic. Cleansing: tables to rows, markup stripped, page numbers removed, whitespace tidied.</td><td><code>ai_parse_document</code></td></tr>
+      <tr><td><code>documents_classified</code></td><td>Picks one of the registry's types; writes a 60-word summary.</td><td><code>ai_classify</code>, <code>ai_summarize</code></td></tr>
+      <tr><td><code>documents_extracted</code></td><td>One extraction step per type, generated from the registry. Cleansing: ISO dates, numeric amounts, trimmed text.</td><td><code>ai_extract</code></td></tr>
+      <tr><td><code>document_chunks</code></td><td>Splits documents into search passages with title, section and page context, plus document metadata for filtering.</td><td><code>ai_prep_search</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Gold: trusted tables</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Table</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td>One table per type</td><td><code>gold.invoices</code>, <code>gold.contracts</code>, <code>gold.asset_undertakings</code>…: typed columns, a <code>check_</code> column per rule, <code>failed_checks</code>, <code>validation_status</code></td></tr>
+      <tr><td><code>document_catalog</code></td><td>One row per file with all metadata and a single <code>processing_status</code></td></tr>
+      <tr><td><code>document_fields</code></td><td>Every extracted field as a row, for any type</td></tr>
+      <tr><td><code>document_validations</code></td><td>Every rule result for every document</td></tr>
+      <tr><td><code>invoice_line_items</code>, <code>vendor_spend_monthly</code></td><td>Invoice detail and spend by vendor and month</td></tr>
+      <tr><td><code>data_quality_summary</code></td><td>Pass rate per check, with failing files</td></tr>
+      <tr><td><code>extraction_accuracy</code> (+ summary)</td><td>Field-by-field comparison with the answer key</td></tr>
+      <tr><td><code>key_dates</code> (view)</td><td>Expiries, renewal-notice deadlines, hearings and deadlines with days left, urgency and responsible team, always computed from today</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="quality">
+  <h2><span class="n">7</span>Validation and accuracy</h2>
+  <p>Quality is checked three ways:</p>
+  <ul>
+    <li><b>Data-quality expectations</b> on every layer: parse succeeded, text present, type known, extraction succeeded. Visible in the pipeline's data-quality view.</li>
+    <li><b>Business rules per type</b>: e.g. invoice totals reconcile and the TRN is valid; an ID is not expired; a contract ends after it starts; an asset form is signed after receipt, approved after signature, and its serial number is not issued twice. Any failure sets the document to <b>Needs review</b> and keeps it out of the library.</li>
+    <li><b>Accuracy against an answer key</b>: 73 known fields across 11 test documents. Currently <b>94.5% exact</b> (69 of 73) and 100% counting partial matches, where the value is correct but includes extra detail.</li>
+  </ul>
+  <p class="note">The rules have already caught real problems: a received date read from a browser print timestamp was stopped by the "signed after receipt" check before it reached staff.</p>
+</section>
+
+<section id="search">
+  <h2><span class="n">8</span>Search, Genie and alerts</h2>
+  <h3>Vector search index</h3>
+  <p><code>silver.document_chunks_index</code> on endpoint <code>doc-intelligence-vs</code>. Each passage is converted to a vector by the <code>databricks-gte-large-en</code> model. A question is converted the same way and the closest passages are returned. Hybrid mode also matches exact words, for invoice numbers, case numbers and serial numbers.</p>
+  <h3>Genie space: Records Document Intelligence</h3>
+  <p>Turns plain-English questions into SQL over 17 gold tables, using business instructions ("for anything due or overdue, use key_dates") and tested example queries. It shows the SQL it ran so answers can be checked. Config: <code>doc_intelligence_pipeline/genie/build_genie_space.py</code>.</p>
+  <h3>Weekly alert</h3>
+  <p>SQL alert "Records: key dates due within 90 days" runs every Monday at 08:00 Dubai time. If anything is overdue or due within 90 days, it emails the list. Definition: <code>doc_intelligence_pipeline/alerts/key_dates_alert.json</code>.</p>
+</section>
+
+<section id="job">
+  <h2><span class="n">9</span>Automatic processing (the job)</h2>
+  <p><code>doc_intelligence_auto_process</code>, defined in <code>resources/auto_process.job.yml</code>.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Part</th><th>Setting</th></tr></thead>
+    <tbody>
+      <tr><td>Trigger</td><td>File arrival on the documents volume, including sub-folders. Waits 60 s after the last change, fires at most once a minute.</td></tr>
+      <tr><td>Task 1</td><td><code>process_new_documents</code>: runs the pipeline; only new files go through the AI steps.</td></tr>
+      <tr><td>Task 2</td><td><code>refresh_search_index</code>: runs <code>src/jobs/sync_search_index.py</code> so new passages become searchable.</td></tr>
+      <tr><td>Safety</td><td>One run at a time; later triggers queue.</td></tr>
+    </tbody>
+  </table></div>
+  <p><span class="ok">Tested:</span> a file dropped at 07:25 was picked up at 07:28 and searchable at 07:31. The project is deployed in production mode so the trigger stays live.</p>
+</section>
+
+<section id="app">
+  <h2><span class="n">10</span>The Records app</h2>
+  <p><code>records-search</code> is a Databricks App: a web app hosted inside the workspace, signed in with company accounts. URL: <a href="https://records-search-<workspace-id>.aws.databricksapps.com">records-search-<workspace-id>.aws.databricksapps.com</a>.</p>
+  <h3>How it is built</h3>
+<pre>
+ Browser: React pages (AppKit UI)
+     │
+ Node.js server with AppKit plugins
+   ├─ aiSearch  ─► vector search index        Search, Assistant
+   ├─ analytics ─► SQL warehouse → gold       Library, Document, Key dates, Insights
+   ├─ files     ─► documents volume           Open original, Download, Add document
+   ├─ genie     ─► Genie space                Ask the data, Assistant
+   └─ agents    ─► Llama 3.3 70B + tools      Assistant
+</pre>
+  <p>Seven SQL files in <code>config/queries/</code> feed the pages. The Assistant is an agent (<code>server/agents/records/agent.ts</code>) with two tools, document search and Genie, instructed to answer only from what it finds and to cite source files.</p>
+  <h3>Pages</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Page</th><th>What people do</th></tr></thead>
+    <tbody>
+      <tr><td>Search</td><td>Search by meaning or exact words; filter or browse by type; open details or the original</td></tr>
+      <tr><td>Document</td><td>Summary, key details, every extracted field, the check results, the original file</td></tr>
+      <tr><td>Library</td><td>All documents that passed every check; filters; Add document (processed automatically)</td></tr>
+      <tr><td>Key dates</td><td>Overdue / 30 / 90 days / 12 months, filtered by team, linked to each document</td></tr>
+      <tr><td>Assistant</td><td>Plain-English questions; shows what it searched or asked Genie; cites sources</td></tr>
+      <tr><td>Insights</td><td>KPIs against best practice, charts, and Ask the data via Genie</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Deployment</h3>
+  <p>From <code>records-search/</code>: <code>databricks bundle deploy</code>, then <code>databricks bundle run app</code>. Databricks security-scans the code, installs packages, builds and starts the app. Query types are generated in advance and committed (<code>shared/appkit-types/analytics.d.ts</code>), so the app's own identity needs no data access to build. The app is billed for every hour it runs.</p>
+</section>
+
+<section id="example">
+  <h2><span class="n">11</span>One document, start to finish</h2>
+  <p>An employee's laptop handover form, uploaded through the app:</p>
+  <ol class="steps">
+    <li><b>Upload.</b> Add document saves it to the volume.</li>
+    <li><b>About a minute later.</b> The job's trigger notices the file and starts a run.</li>
+    <li><b>Bronze.</b> The file is stored, fingerprinted and routed to ai_parse.</li>
+    <li><b>Silver.</b> AI reads the form, classifies it as an asset undertaking, and extracts the employee, asset make and model, serial number, received date, signatures and approver. It is split into search passages.</li>
+    <li><b>Gold.</b> It lands in <code>gold.asset_undertakings</code>; all six checks pass, so it is Passed and appears in the library.</li>
+    <li><b>Search refresh.</b> The job updates the index; within about six minutes of upload staff can find it, ask the Assistant who has which laptop, or see it in Genie answers.</li>
+  </ol>
+</section>
+
+<section id="security">
+  <h2><span class="n">12</span>Security and access</h2>
+  <ul>
+    <li><b>Each person's own permissions.</b> The app runs searches, queries, file access and Genie as the signed-in user. Unity Catalog decides what each person can see.</li>
+    <li><b>The app has no data access of its own.</b> Its identity can only call the AI model.</li>
+    <li><b>All users today</b> can open the app, read gold tables and search passages, and read and upload documents.</li>
+    <li><b>Private:</b> the answer key and test notes sit in a private volume. The email-intake identity <code>records-email-intake</code> can only read and add files.</li>
+  </ul>
+  <p class="warn">Personal documents such as ID cards are currently visible to every app user. Before loading real HR records, restrict ID documents to the HR group and mask ID numbers for others (Unity Catalog row filters and column masks; the app follows them automatically).</p>
+</section>
+
+<section id="results">
+  <h2><span class="n">13</span>Results against the use case</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Pillar</th><th>KPI</th><th>Pilot</th><th>Best practice</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Productivity</td><td>Document retrieval time</td><td>&lt; 1 second</td><td>1 min</td><td><span class="pill met">Met</span></td></tr>
+      <tr><td>Productivity</td><td>Storage costs</td><td>To measure</td><td>$40k</td><td><span class="pill later">At rollout</span></td></tr>
+      <tr><td>Productivity</td><td>Manual data entry effort</td><td>Automated</td><td>−60%</td><td><span class="pill later">At rollout</span></td></tr>
+      <tr><td>Experience</td><td>Search success rate</td><td>To measure</td><td>98%</td><td><span class="pill later">At rollout</span></td></tr>
+      <tr><td>Adoption</td><td>Documents digitised</td><td>100% (43 of 43)</td><td>75%</td><td><span class="pill met">Met</span></td></tr>
+      <tr><td>Adoption</td><td>Users accessing system</td><td>Open to all</td><td>500</td><td><span class="pill later">At rollout</span></td></tr>
+      <tr><td>Compliance</td><td>Record accuracy</td><td>94.5% exact</td><td>98%</td><td><span class="pill close">Close</span></td></tr>
+      <tr><td>Specific</td><td>Search success rate</td><td>To measure</td><td>+95%</td><td><span class="pill later">At rollout</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>Pilot on sample documents. The 2026 baseline and targets are not yet set on the use case.</p>
+</section>
+
+<section id="runbook">
+  <h2><span class="n">14</span>Running and changing it</h2>
+  <div class="tw"><table>
+    <thead><tr><th>To</th><th>Do this</th></tr></thead>
+    <tbody>
+      <tr><td>Add or change a document type</td><td>Edit <code>config/extraction_schemas.json</code> → <code>python scripts/load_schema_registry.py</code> → <code>databricks bundle deploy -t dev</code> in <code>doc_intelligence_pipeline/</code>. To re-extract existing documents, run a selective full refresh of <code>documents_extracted</code>, then a normal run.</td></tr>
+      <tr><td>Change pipeline or job</td><td>Edit files in <code>doc_intelligence_pipeline/</code> → <code>databricks bundle deploy -t dev --profile DEFAULT</code></td></tr>
+      <tr><td>Change the app</td><td>Edit <code>records-search/</code> → <code>databricks bundle deploy</code> → <code>databricks bundle run app</code></td></tr>
+      <tr><td>Change Genie</td><td>Edit <code>genie/build_genie_space.py</code> → run it → <code>databricks genie update-space &lt;id&gt; --json @genie/genie_space_request.json</code></td></tr>
+      <tr><td>Monitor</td><td>Databricks → Jobs &amp; Pipelines (runs, data quality); Compute → Apps (status, logs); Alerts</td></tr>
+      <tr><td>App shows "Not available"</td><td>Check the account status, start the app, then redeploy with <code>databricks bundle run app</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="open">
+  <h2><span class="n">15</span>Open items</h2>
+  <ul>
+    <li><b>Email intake</b>: IT creates the shared mailbox, a secret for <code>records-email-intake</code>, and the Power Automate flow (see <code>INTEGRATIONS_SETUP.md</code>).</li>
+    <li><b>Teams</b>: add the app as a Teams tab now; a full Teams bot needs Entra ID single sign-on for Databricks.</li>
+    <li><b>Access by team</b>: restrict HR documents and mask ID numbers before loading real HR records.</li>
+    <li><b>Baselines</b>: measure today's retrieval time, data-entry effort and storage, and build a search question set, to complete the KPIs.</li>
+    <li><b>Storage optimisation</b>: duplicate reports, archive rules, then retention and disposal advice.</li>
+    <li><b>Cost and availability</b>: the app and search endpoint bill hourly; confirm the account's credit status so the app is not stopped again.</li>
+  </ul>
+</section>
+
+<section id="files">
+  <h2><span class="n">16</span>Where everything is</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Folder (in DOCUMENT INTELLIGENCE)</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>doc_intelligence_pipeline/</code></td><td>Pipeline code, job, registry, Genie config, alert, scripts</td></tr>
+      <tr><td><code>records-search/</code></td><td>The Records app</td></tr>
+      <tr><td><code>prototype/</code></td><td>The demo page and this guide</td></tr>
+      <tr><td><code>access/</code></td><td>The all-users permission grants</td></tr>
+      <tr><td><code>INTEGRATIONS_SETUP.md</code></td><td>IT steps for email intake and Teams</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Records · Legal / Operations pilot · Figures from the pilot run on sample documents.</footer>
+</div>

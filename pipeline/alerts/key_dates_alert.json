@@ -1,0 +1,23 @@
+{
+  "display_name": "Records: key dates due within 90 days",
+  "query_text": "SELECT urgency, date_format(key_date, 'd MMM yyyy') AS due, days_left, date_type, subject, team, file_name FROM document_intelligence.gold.key_dates WHERE urgency IN ('Overdue', 'Within 30 days', 'Within 90 days') ORDER BY key_date",
+  "warehouse_id": "<warehouse-id>",
+  "custom_summary": "Records: {{ALERT_STATUS}} - key dates due within 90 days",
+  "custom_description": "These records have a date to act on (overdue, or due within the next 90 days):\n\n{{QUERY_RESULT_TABLE}}\n\nOpen the Records app > Key dates for details and the original documents.",
+  "evaluation": {
+    "source": {"name": "days_left", "aggregation": "COUNT"},
+    "comparison_operator": "GREATER_THAN",
+    "threshold": {"value": {"double_value": 0}},
+    "empty_result_state": "OK",
+    "notification": {
+      "notify_on_ok": false,
+      "retrigger_seconds": 0,
+      "subscriptions": [{"user_email": "you@example.com"}]
+    }
+  },
+  "schedule": {
+    "quartz_cron_schedule": "0 0 8 ? * MON",
+    "timezone_id": "Asia/Dubai",
+    "pause_status": "UNPAUSED"
+  }
+}

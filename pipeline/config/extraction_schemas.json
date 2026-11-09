@@ -1,0 +1,879 @@
+{
+  "_readme": "Schema registry. One entry per document type. Loaded into document_intelligence.config.extraction_schemas by scripts/load_schema_registry.py. CORE fields (document_number, document_date, issuer_name, recipient_name, parties, currency, total_amount, language) are added to every type automatically by the pipeline, so do not repeat them here. Field properties: type = string | number | integer | boolean | enum (+labels) | array (+items) | object (+properties); description = hint for the model; format = date makes the gold column a DATE. Validation rules are SQL boolean expressions over the gold table columns (core + the fields below). ground_truth maps the answer key (truth.json) to this registry: truth_type is the type name used in truth.json, field_map maps truth.json field -> gold column.",
+  "ground_truth_supplement": {
+    "_source": "Correct answers listed in HOW-TO-TEST.md that truth.json does not contain",
+    "10-trade-licence-specimen.png": {
+      "PartnersAndManagers": [
+        "Faisal Al Mazrouei",
+        "Daniel Okafor",
+        "Rania Haddad"
+      ]
+    },
+    "11-bilingual-letter-ar-en.png": {
+      "Sender": "Gulf Horizon Trading LLC"
+    }
+  },
+  "core_fields": {
+    "document_number": {
+      "type": "string",
+      "description": "Main identifier printed on the document: invoice/receipt number, case number, licence number, ID number, contract or letter reference"
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Main date of the document: invoice, transaction, issue, judgment, letter or effective date"
+    },
+    "issuer_name": {
+      "type": "string",
+      "description": "Organisation or person that issued or authored the document (vendor, merchant, court, authority, sender, first party)"
+    },
+    "recipient_name": {
+      "type": "string",
+      "description": "Customer, addressee, holder or counterparty the document is for"
+    },
+    "parties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All named organisations and people"
+    },
+    "currency": {
+      "type": "enum",
+      "labels": [
+        "AED",
+        "USD",
+        "EUR",
+        "GBP",
+        "SAR",
+        "INR",
+        "OTHER"
+      ]
+    },
+    "total_amount": {
+      "type": "number",
+      "description": "Main monetary amount: grand total, contract value, amount claimed or awarded; null if none"
+    },
+    "language": {
+      "type": "enum",
+      "labels": [
+        "English",
+        "Arabic",
+        "English and Arabic",
+        "Other"
+      ]
+    }
+  },
+  "document_types": [
+    {
+      "document_type": "invoice",
+      "description": "Bill or tax invoice from a vendor requesting payment for goods or services",
+      "gold_table": "invoices",
+      "ground_truth": {
+        "truth_type": "Invoice",
+        "field_map": {
+          "VendorName": "issuer_name",
+          "VendorTaxId": "vendor_tax_id",
+          "CustomerName": "recipient_name",
+          "InvoiceId": "document_number",
+          "InvoiceDate": "document_date",
+          "DueDate": "due_date",
+          "PurchaseOrder": "purchase_order",
+          "SubTotal": "subtotal",
+          "TotalTax": "tax_amount",
+          "InvoiceTotal": "total_amount",
+          "Currency": "currency"
+        }
+      },
+      "instructions": "Supplier invoices. vendor_tax_id is the TRN / VAT / tax registration number. Line item amount = quantity x unit price.",
+      "fields": {
+        "due_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Payment due date, only if a due date is printed on the invoice. Never calculate it from the invoice date and payment terms; return null if not printed."
+        },
+        "payment_terms": {
+          "type": "string"
+        },
+        "purchase_order": {
+          "type": "string"
+        },
+        "vendor_tax_id": {
+          "type": "string"
+        },
+        "customer_tax_id": {
+          "type": "string"
+        },
+        "issuer_address": {
+          "type": "string"
+        },
+        "issuer_email": {
+          "type": "string"
+        },
+        "issuer_phone": {
+          "type": "string"
+        },
+        "recipient_address": {
+          "type": "string"
+        },
+        "subtotal": {
+          "type": "number"
+        },
+        "shipping_amount": {
+          "type": "number"
+        },
+        "tax_rate_percent": {
+          "type": "number",
+          "description": "Tax / VAT rate in percent, e.g. 5"
+        },
+        "tax_amount": {
+          "type": "number"
+        },
+        "line_items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item_code": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "number"
+              },
+              "unit_price": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_number IS NOT NULL AND issuer_name IS NOT NULL AND document_date IS NOT NULL AND total_amount IS NOT NULL"
+        },
+        {
+          "name": "positive_total",
+          "expression": "total_amount > 0"
+        },
+        {
+          "name": "totals_reconcile",
+          "expression": "abs(coalesce(subtotal, 0) + coalesce(shipping_amount, 0) + coalesce(tax_amount, 0) - total_amount) <= 0.05"
+        },
+        {
+          "name": "tax_rate_consistent",
+          "expression": "tax_rate_percent IS NULL OR tax_amount IS NULL OR abs(subtotal * tax_rate_percent / 100 - tax_amount) <= 0.05"
+        },
+        {
+          "name": "line_items_sum",
+          "expression": "abs(aggregate(try_variant_get(line_items, '$', 'ARRAY<VARIANT>'), 0D, (acc, x) -> acc + coalesce(try_variant_get(x, '$.amount', 'DOUBLE'), 0D)) - subtotal) <= 0.05"
+        },
+        {
+          "name": "due_date_after_invoice_date",
+          "expression": "due_date IS NULL OR due_date >= document_date"
+        },
+        {
+          "name": "date_not_future",
+          "expression": "document_date <= current_date()"
+        },
+        {
+          "name": "trn_format",
+          "expression": "vendor_tax_id IS NULL OR regexp_replace(vendor_tax_id, '[^0-9]', '') RLIKE '^[0-9]{15}$' OR currency <> 'AED'"
+        },
+        {
+          "name": "not_duplicate",
+          "expression": "count(*) OVER (PARTITION BY upper(issuer_name), document_number) = 1"
+        }
+      ]
+    },
+    {
+      "document_type": "receipt",
+      "description": "Till or point-of-sale receipt for a purchase that has already been paid",
+      "gold_table": "receipts",
+      "ground_truth": {
+        "truth_type": "Receipt",
+        "field_map": {
+          "MerchantName": "issuer_name",
+          "MerchantPhone": "merchant_phone",
+          "TransactionDate": "document_date",
+          "TransactionTime": "transaction_time",
+          "Subtotal": "subtotal",
+          "TotalTax": "tax_amount",
+          "Total": "total_amount"
+        }
+      },
+      "instructions": "Retail receipts, often phone photos. document_number is the receipt number.",
+      "fields": {
+        "merchant_address": {
+          "type": "string"
+        },
+        "merchant_phone": {
+          "type": "string"
+        },
+        "merchant_tax_id": {
+          "type": "string"
+        },
+        "transaction_time": {
+          "type": "string",
+          "description": "HH:MM"
+        },
+        "payment_method": {
+          "type": "string"
+        },
+        "subtotal": {
+          "type": "number"
+        },
+        "tax_amount": {
+          "type": "number"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "issuer_name IS NOT NULL AND document_date IS NOT NULL AND total_amount IS NOT NULL"
+        },
+        {
+          "name": "totals_reconcile",
+          "expression": "subtotal IS NULL OR abs(subtotal + coalesce(tax_amount, 0) - total_amount) <= 0.05"
+        },
+        {
+          "name": "items_sum",
+          "expression": "subtotal IS NULL OR abs(aggregate(try_variant_get(items, '$', 'ARRAY<VARIANT>'), 0D, (acc, x) -> acc + coalesce(try_variant_get(x, '$.amount', 'DOUBLE'), 0D)) - subtotal) <= 0.05"
+        },
+        {
+          "name": "date_not_future",
+          "expression": "document_date <= current_date()"
+        }
+      ]
+    },
+    {
+      "document_type": "business_card",
+      "description": "Business or visiting card with one person's name, title and contact details",
+      "gold_table": "business_cards",
+      "ground_truth": {
+        "truth_type": "Business card",
+        "field_map": {
+          "ContactName": "contact_name",
+          "JobTitle": "job_title",
+          "CompanyName": "company_name"
+        }
+      },
+      "instructions": "Return every phone number and email printed on the card.",
+      "fields": {
+        "contact_name": {
+          "type": "string"
+        },
+        "job_title": {
+          "type": "string"
+        },
+        "company_name": {
+          "type": "string"
+        },
+        "phones": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "emails": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "website": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "has_contact_name",
+          "expression": "contact_name IS NOT NULL"
+        },
+        {
+          "name": "has_contact_channel",
+          "expression": "coalesce(array_size(try_variant_get(phones, '$', 'ARRAY<STRING>')), 0) + coalesce(array_size(try_variant_get(emails, '$', 'ARRAY<STRING>')), 0) > 0"
+        },
+        {
+          "name": "email_format",
+          "expression": "forall(coalesce(try_variant_get(emails, '$', 'ARRAY<STRING>'), array()), e -> e RLIKE '^[^@ ]+@[^@ ]+\\\\.[^@ ]+$')"
+        }
+      ]
+    },
+    {
+      "document_type": "id_document",
+      "description": "Identity card, passport, residence permit, driving licence or similar personal ID",
+      "gold_table": "id_documents",
+      "ground_truth": {
+        "truth_type": "ID document",
+        "field_map": {
+          "FullName": "full_name",
+          "DocumentNumber": "document_number",
+          "DateOfBirth": "date_of_birth",
+          "DateOfIssue": "document_date",
+          "DateOfExpiration": "date_of_expiry",
+          "Nationality": "nationality",
+          "Sex": "sex"
+        }
+      },
+      "instructions": "document_number is the ID / passport number, document_date is the date of issue, issuer_name is the issuing country or authority, recipient_name is the holder.",
+      "fields": {
+        "document_kind": {
+          "type": "enum",
+          "labels": [
+            "national_id",
+            "passport",
+            "residence_permit",
+            "driving_licence",
+            "other"
+          ]
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "date_of_birth": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_of_expiry": {
+          "type": "string",
+          "format": "date"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "sex": {
+          "type": "enum",
+          "labels": [
+            "M",
+            "F",
+            "X"
+          ]
+        },
+        "mrz_present": {
+          "type": "boolean",
+          "description": "Machine-readable zone lines (with <<< characters) are printed"
+        },
+        "is_specimen": {
+          "type": "boolean",
+          "description": "Marked SPECIMEN / SAMPLE"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_number IS NOT NULL AND full_name IS NOT NULL AND date_of_birth IS NOT NULL"
+        },
+        {
+          "name": "dates_in_order",
+          "expression": "date_of_birth < document_date AND document_date < date_of_expiry"
+        },
+        {
+          "name": "not_expired",
+          "expression": "date_of_expiry >= current_date()"
+        }
+      ]
+    },
+    {
+      "document_type": "contract",
+      "description": "Agreement between two or more parties setting out terms, obligations, duration and payment",
+      "gold_table": "contracts",
+      "ground_truth": {
+        "truth_type": "Contract",
+        "field_map": {
+          "EffectiveDate": "document_date",
+          "ExpirationDate": "end_date",
+          "ContractValue": "total_amount",
+          "HasPenaltyClause": "has_penalty_clause",
+          "HasConfidentialityClause": "has_confidentiality_clause",
+          "GoverningLaw": "governing_law"
+        }
+      },
+      "instructions": "document_date is the effective / start date, total_amount is the total contract value.",
+      "fields": {
+        "contract_title": {
+          "type": "string"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "term_months": {
+          "type": "integer"
+        },
+        "auto_renewal": {
+          "type": "boolean"
+        },
+        "notice_period_days": {
+          "type": "integer"
+        },
+        "governing_law": {
+          "type": "string"
+        },
+        "payment_terms_days": {
+          "type": "integer"
+        },
+        "has_penalty_clause": {
+          "type": "boolean"
+        },
+        "has_confidentiality_clause": {
+          "type": "boolean"
+        },
+        "signatories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_date IS NOT NULL AND contract_title IS NOT NULL"
+        },
+        {
+          "name": "has_two_parties",
+          "expression": "coalesce(array_size(parties), 0) >= 2"
+        },
+        {
+          "name": "end_after_start",
+          "expression": "end_date IS NULL OR end_date > document_date"
+        },
+        {
+          "name": "has_signatories",
+          "expression": "coalesce(array_size(try_variant_get(signatories, '$', 'ARRAY<STRING>')), 0) > 0"
+        }
+      ]
+    },
+    {
+      "document_type": "legal_notice",
+      "description": "Formal legal notice or demand letter from a lawyer or party requiring action or payment",
+      "gold_table": "legal_notices",
+      "ground_truth": {
+        "truth_type": "Legal notice",
+        "field_map": {
+          "Sender": "issuer_name",
+          "Recipient": "recipient_name",
+          "NoticeDate": "document_date",
+          "Reference": "document_number",
+          "AmountClaimed": "total_amount",
+          "Deadline": "deadline_date"
+        }
+      },
+      "instructions": "issuer_name is the law firm or sender, recipient_name the party being notified, total_amount the amount claimed, document_number the notice reference.",
+      "fields": {
+        "on_behalf_of": {
+          "type": "string"
+        },
+        "payment_deadline_days": {
+          "type": "integer"
+        },
+        "deadline_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Only if an explicit date is printed"
+        },
+        "demands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "consequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Risks / actions threatened if not complied with"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "issuer_name IS NOT NULL AND recipient_name IS NOT NULL AND document_date IS NOT NULL"
+        },
+        {
+          "name": "has_deadline",
+          "expression": "payment_deadline_days IS NOT NULL OR deadline_date IS NOT NULL"
+        }
+      ]
+    },
+    {
+      "document_type": "court_judgment",
+      "description": "Court judgment, order or ruling issued in legal proceedings",
+      "gold_table": "court_judgments",
+      "ground_truth": {
+        "truth_type": "Court document",
+        "field_map": {
+          "Court": "issuer_name",
+          "CaseNumber": "document_number",
+          "Claimant": "claimant",
+          "Defendant": "defendant",
+          "JudgmentDate": "document_date",
+          "HearingDate": "next_hearing_date",
+          "AmountAwarded": "total_amount"
+        }
+      },
+      "instructions": "document_number is the case number, document_date the judgment date, issuer_name the court, total_amount the amount awarded.",
+      "fields": {
+        "claimant": {
+          "type": "string"
+        },
+        "defendant": {
+          "type": "string"
+        },
+        "case_type": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string",
+          "description": "One-sentence ruling"
+        },
+        "interest_rate_percent": {
+          "type": "number"
+        },
+        "next_hearing_date": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_number IS NOT NULL AND claimant IS NOT NULL AND defendant IS NOT NULL AND document_date IS NOT NULL"
+        },
+        {
+          "name": "hearing_after_judgment",
+          "expression": "next_hearing_date IS NULL OR next_hearing_date > document_date"
+        }
+      ]
+    },
+    {
+      "document_type": "power_of_attorney",
+      "description": "Power of attorney granting a person authority to act on behalf of another person or company",
+      "gold_table": "powers_of_attorney",
+      "ground_truth": {
+        "truth_type": "Power of attorney",
+        "field_map": {
+          "Grantor": "grantor",
+          "Attorney": "attorney",
+          "IssueDate": "valid_from",
+          "ExpiryDate": "valid_to",
+          "Revocable": "revocable"
+        }
+      },
+      "instructions": "document_number is the notary reference, document_date the date signed.",
+      "fields": {
+        "grantor": {
+          "type": "string"
+        },
+        "grantor_on_behalf_of": {
+          "type": "string"
+        },
+        "attorney": {
+          "type": "string"
+        },
+        "powers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date"
+        },
+        "revocable": {
+          "type": "boolean"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "grantor IS NOT NULL AND attorney IS NOT NULL"
+        },
+        {
+          "name": "has_powers",
+          "expression": "coalesce(array_size(try_variant_get(powers, '$', 'ARRAY<STRING>')), 0) > 0"
+        },
+        {
+          "name": "valid_period",
+          "expression": "valid_to IS NULL OR valid_to > valid_from"
+        },
+        {
+          "name": "currently_valid",
+          "expression": "current_date() BETWEEN valid_from AND valid_to"
+        }
+      ]
+    },
+    {
+      "document_type": "trade_licence",
+      "description": "Commercial or trade licence issued by an authority permitting a business to operate",
+      "gold_table": "trade_licences",
+      "ground_truth": {
+        "truth_type": "Trade licence",
+        "field_map": {
+          "LicenceNumber": "document_number",
+          "TradeName": "recipient_name",
+          "LegalForm": "legal_form",
+          "IssueDate": "document_date",
+          "ExpiryDate": "expiry_date",
+          "PartnersAndManagers": "partners_and_managers"
+        }
+      },
+      "instructions": "document_number is the licence number, document_date the issue date, issuer_name the issuing authority, recipient_name the licensed company. List every person in the partners / owners / managers section, whatever their role.",
+      "fields": {
+        "legal_form": {
+          "type": "string"
+        },
+        "expiry_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "partners_and_managers": {
+          "type": "array",
+          "description": "Every partner, owner and manager listed on the licence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string",
+                "description": "e.g. Partner, Manager, Owner"
+              },
+              "share_percent": {
+                "type": "number",
+                "description": "Ownership share, if printed"
+              }
+            }
+          }
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_number IS NOT NULL AND recipient_name IS NOT NULL AND expiry_date IS NOT NULL"
+        },
+        {
+          "name": "expiry_after_issue",
+          "expression": "expiry_date > document_date"
+        },
+        {
+          "name": "not_expired",
+          "expression": "expiry_date >= current_date()"
+        },
+        {
+          "name": "has_activities",
+          "expression": "coalesce(array_size(try_variant_get(activities, '$', 'ARRAY<STRING>')), 0) > 0"
+        },
+        {
+          "name": "has_partners",
+          "expression": "coalesce(array_size(try_variant_get(partners_and_managers, '$', 'ARRAY<VARIANT>')), 0) > 0"
+        },
+        {
+          "name": "partner_shares_total_100",
+          "expression": "coalesce(aggregate(try_variant_get(partners_and_managers, '$', 'ARRAY<VARIANT>'), 0D, (acc, p) -> acc + coalesce(try_variant_get(p, '$.share_percent', 'DOUBLE'), 0D)), 0D) IN (0D, 100D)"
+        }
+      ]
+    },
+    {
+      "document_type": "letter",
+      "description": "Business letter, email or general correspondence, in English, Arabic or both",
+      "gold_table": "letters",
+      "ground_truth": {
+        "truth_type": "Letter / correspondence",
+        "field_map": {
+          "Date": "document_date",
+          "Reference": "document_number",
+          "Deadline": "deadline_date",
+          "SignedBy": "signed_by",
+          "Sender": "issuer_name"
+        }
+      },
+      "instructions": "issuer_name is the sending organisation named in the letterhead (its English name), not the signatory and not a closing phrase. document_number is any reference quoted in the letter. For bilingual letters extract values once, in English.",
+      "fields": {
+        "subject": {
+          "type": "string"
+        },
+        "deadline_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "requested_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "signed_by": {
+          "type": "string"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "document_date IS NOT NULL AND issuer_name IS NOT NULL"
+        },
+        {
+          "name": "deadline_after_letter",
+          "expression": "deadline_date IS NULL OR deadline_date >= document_date"
+        }
+      ]
+    },
+    {
+      "document_type": "asset_undertaking",
+      "description": "Employee asset undertaking or handover form acknowledging receipt of a company asset such as a laptop, phone, SIM card, vehicle, keys, uniform or stamp",
+      "gold_table": "asset_undertakings",
+      "ground_truth": {
+        "truth_type": "",
+        "field_map": {}
+      },
+      "instructions": "HR asset undertaking forms. issuer_name is the company that owns the asset, recipient_name is the employee receiving it. document_date is the date the asset was received, taken from the sentence 'confirm to have received on <date>'; ignore printed page headers or footers with a print date/time. document_number is the undertaking reference such as AST-003500-0119 (without the word Undertaking), not the form template code. Only the ticked asset category counts.",
+      "fields": {
+        "employee_name": {
+          "type": "string"
+        },
+        "employee_number": {
+          "type": "string",
+          "description": "Employee number or code, only if filled in"
+        },
+        "asset_category": {
+          "type": "enum",
+          "labels": [
+            "computer_or_electronic",
+            "mobile_or_sim",
+            "vehicle",
+            "facility_keys",
+            "company_stamp",
+            "uniform",
+            "medical_insurance",
+            "beddings",
+            "other"
+          ],
+          "description": "The ticked asset category"
+        },
+        "asset_make": {
+          "type": "string"
+        },
+        "asset_model": {
+          "type": "string"
+        },
+        "serial_number": {
+          "type": "string"
+        },
+        "asset_condition": {
+          "type": "string",
+          "description": "Condition stated at handover, e.g. Good"
+        },
+        "employee_signed_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "approver_name": {
+          "type": "string",
+          "description": "Department or subsidiary head who approved"
+        },
+        "approver_signed_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "form_code": {
+          "type": "string",
+          "description": "Form template code, e.g. ASH-HR-OF-009"
+        }
+      },
+      "validation_rules": [
+        {
+          "name": "required_fields",
+          "expression": "employee_name IS NOT NULL AND document_date IS NOT NULL AND (serial_number IS NOT NULL OR asset_model IS NOT NULL)"
+        },
+        {
+          "name": "employee_signed",
+          "expression": "employee_signed_date IS NOT NULL"
+        },
+        {
+          "name": "approved",
+          "expression": "approver_name IS NOT NULL AND approver_signed_date IS NOT NULL"
+        },
+        {
+          "name": "signed_after_receipt",
+          "expression": "employee_signed_date IS NULL OR employee_signed_date >= document_date"
+        },
+        {
+          "name": "approved_after_employee",
+          "expression": "approver_signed_date IS NULL OR employee_signed_date IS NULL OR approver_signed_date >= employee_signed_date"
+        },
+        {
+          "name": "serial_not_duplicated",
+          "expression": "serial_number IS NULL OR count(*) OVER (PARTITION BY upper(serial_number)) = 1"
+        }
+      ]
+    },
+    {
+      "document_type": "other",
+      "description": "Any other kind of document that does not fit the types above",
+      "gold_table": "other_documents",
+      "ground_truth": {
+        "truth_type": "Other",
+        "field_map": {}
+      },
+      "instructions": "Capture whatever key facts the document contains.",
+      "fields": {
+        "title": {
+          "type": "string"
+        },
+        "key_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "key_dates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "validation_rules": []
+    }
+  ]
+}

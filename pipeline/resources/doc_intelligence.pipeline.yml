@@ -1,0 +1,22 @@
+resources:
+  pipelines:
+    doc_intelligence_medallion:
+      name: doc_intelligence_medallion
+      catalog: ${var.catalog}
+      schema: silver
+      serverless: true
+      continuous: false
+      root_path: ../src
+      libraries:
+        - glob:
+            include: ../src/transformations/**
+      configuration:
+        doc.catalog: ${var.catalog}
+        doc.source_volume: /Volumes/${var.catalog}/default/document_intelligence_sample/
+        # Formats sent to ai_parse_document (OCR + layout) and formats read as plain text.
+        doc.parse_extensions: pdf,png,jpg,jpeg,tif,tiff,doc,docx,ppt,pptx
+        doc.text_extensions: txt,md,csv,json,xml,html,htm,eml,log
+        # Files that are not documents, skipped if anyone drops them into the source volume again.
+        doc.exclude_files: truth.json,HOW-TO-TEST.md,intake-test.txt
+        # Answer key used by gold.extraction_accuracy. Kept in a private volume: app users cannot read it.
+        doc.ground_truth_file: /Volumes/${var.catalog}/config/reference_files/truth.json

@@ -1,0 +1,21 @@
+# Dependencies and builds
+node_modules/
+dist/
+build/
+client/dist/
+.venv/
+__pycache__/
+*.pyc
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+.databricks/
+.databrickscfg
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

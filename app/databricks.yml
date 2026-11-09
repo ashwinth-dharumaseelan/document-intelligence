@@ -1,0 +1,36 @@
+bundle:
+  name: records-search
+
+resources:
+  apps:
+    app:
+      name: "records-search"
+      description: "Records search console and assistant for digitised legal and operations documents"
+      source_code_path: ./
+
+      # Start the app automatically on deploy.
+      lifecycle:
+        started: true
+      # Bound to the app's service principal: the agent's model call (mixed mode) and build-time type generation.
+      resources:
+        - name: agents-serving-endpoint
+          serving_endpoint:
+            name: databricks-meta-llama-3-3-70b-instruct
+            permission: CAN_QUERY
+        - name: sql-warehouse
+          sql_warehouse:
+            id: <warehouse-id>
+            permission: CAN_USE
+      # Everything a person does runs on their behalf with these scopes.
+      user_api_scopes:
+        - model-serving
+        - vector-search
+        - sql
+        - files
+        - genie
+
+targets:
+  default:
+    default: true
+    workspace:
+      host: https://<your-workspace>.cloud.databricks.com

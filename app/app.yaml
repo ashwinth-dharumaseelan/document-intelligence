@@ -1,0 +1,12 @@
+command: ['npm', 'run', 'start']
+env:
+  - name: DATABRICKS_SERVING_ENDPOINT_NAME
+    value: databricks-meta-llama-3-3-70b-instruct
+  - name: DATABRICKS_VS_INDEX_NAME
+    value: document_intelligence.silver.document_chunks_index
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: <warehouse-id>
+  - name: DATABRICKS_VOLUME_FILES
+    value: "/Volumes/document_intelligence/default/document_intelligence_sample"
+  - name: DATABRICKS_GENIE_SPACE_ID
+    value: <genie-space-id>
