@@ -3,7 +3,7 @@
 -- @param document_type STRING = ALL
 -- @param text STRING = gulf
 SELECT
-  document_id, file_name, file_extension, document_type, processing_status,
+  document_id, file_name, file_extension, path, document_type, processing_status,
   document_number, CAST(document_date AS STRING) AS document_date, issuer_name, recipient_name,
   total_amount, currency, page_count, CAST(ingested_at AS STRING) AS ingested_at
 FROM document_intelligence.gold.document_catalog

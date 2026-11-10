@@ -131,6 +131,8 @@ declare module "@databricks/appkit-ui/react" {
         /** @sqlType STRING */
         file_extension: string;
         /** @sqlType STRING */
+        path: string;
+        /** @sqlType STRING */
         document_type: string;
         /** @sqlType STRING */
         processing_status: string;
@@ -150,6 +152,55 @@ declare module "@databricks/appkit-ui/react" {
         page_count: number;
         /** @sqlType STRING */
         ingested_at: string;
+      }>;
+    };
+    document_cards: {
+      name: "document_cards";
+      parameters: {
+        /** STRING - use sql.string() */
+        ids: SQLStringMarker;
+      };
+      result: Array<{
+        /** @sqlType STRING */
+        document_id: string;
+        /** @sqlType STRING */
+        document_type: string;
+        /** @sqlType STRING */
+        summary: string;
+        /** @sqlType STRING */
+        document_number: string;
+        /** @sqlType STRING */
+        document_date: string;
+        /** @sqlType STRING */
+        issuer_name: string;
+        /** @sqlType STRING */
+        recipient_name: string;
+        /** @sqlType STRING */
+        currency: string;
+        /** @sqlType DOUBLE */
+        total_amount: number;
+        /** @sqlType INT */
+        page_count: number;
+        /** @sqlType STRING */
+        processing_status: string;
+      }>;
+    };
+    quality_overview: {
+      name: "quality_overview";
+      parameters: Record<string, never>;
+      result: Array<{
+        /** @sqlType STRING */
+        kind: string;
+        /** @sqlType STRING */
+        check_name: string;
+        /** @sqlType BIGINT */
+        total_rows: number;
+        /** @sqlType BIGINT */
+        passed_rows: number;
+        /** @sqlType DOUBLE */
+        pass_rate_pct: number;
+        /** @sqlType INT */
+        sort_order: number;
       }>;
     };
     document_types: {
